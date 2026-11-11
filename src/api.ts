@@ -11,6 +11,7 @@ export class ErrorApi extends Error {
 
 export interface RespuestaAcceso {
   accessToken: string;
+  user: { id: number | string };
 }
 
 export interface LineaCarrito {
@@ -20,6 +21,7 @@ export interface LineaCarrito {
 }
 
 export interface Carrito { items: LineaCarrito[]; }
+export interface LineaLocal { bookId: string; quantity: number; }
 
 async function peticionCarrito(token: string, ruta = "", method = "GET", datos?: object): Promise<Carrito> {
   const respuesta = await fetch(`${API_URL}/cart${ruta}`, {
@@ -40,6 +42,9 @@ export function cambiarCantidad(token: string, bookId: string, quantity: number)
 }
 export function eliminarDelCarrito(token: string, bookId: string): Promise<Carrito> {
   return peticionCarrito(token, `/items/${encodeURIComponent(bookId)}`, "DELETE");
+}
+export function combinarCarrito(token: string, mergeId: string, items: LineaLocal[]): Promise<Carrito> {
+  return peticionCarrito(token, "/merge", "POST", { mergeId, items });
 }
 
 async function autenticar(ruta: string, datos: object): Promise<RespuestaAcceso> {

@@ -19,7 +19,7 @@ servidor.use((req, res, next) => {
   const libros = /^\/api\/books(?:\/[^/]+(?:\/reviews)?)?\/?$/.test(req.path);
   const sesion = req.path === "/api/session";
   const autenticacion = req.path === "/api/login" || req.path === "/api/register";
-  const carrito = /^\/api\/cart(?:\/items(?:\/[^/]+)?)?\/?$/.test(req.path);
+  const carrito = /^\/api\/cart(?:\/items(?:\/[^/]+)?|\/merge)?\/?$/.test(req.path);
   if (carrito && ["GET", "POST", "PATCH", "DELETE"].includes(req.method)) return next();
   if ((lectura && (libros || sesion)) || (req.method === "POST" && autenticacion)) {
     if (autenticacion) {
@@ -88,6 +88,38 @@ servidor.delete("/cart/items/:id", (req, res) => {
   const restantes = lineas.filter(item => item.bookId !== req.params.id);
   guardarCarrito(req, restantes);
   return res.json(respuestaCarrito(restantes));
+});
+// Una operación de combinación se registra junto al carrito en la misma escritura.
+// Reintentar su identificador no vuelve a sumar las cantidades.
+servidor.post("/cart/merge", (req, res) => {
+  const { mergeId, items } = req.body || {};
+  if (typeof mergeId !== "string" || !/^[a-zA-Z0-9-]{1,100}$/.test(mergeId) || !Array.isArray(items) || items.length === 0 || items.length > 100) {
+    return errorCarrito(res, 400, "Combinación no válida.");
+  }
+  const ids = new Set();
+  for (const item of items) {
+    if (!item || typeof item.bookId !== "string" || ids.has(item.bookId) || !cantidadValida(item.quantity)) return errorCarrito(res, 400, "Líneas no válidas.");
+    ids.add(item.bookId);
+  }
+  const firmas = JSON.stringify(items.map(({ bookId, quantity }) => ({ bookId, quantity })));
+  const operaciones = router.db.get("cartMerges").value() || {};
+  const anterior = operaciones[mergeId];
+  if (anterior) {
+    if (anterior.userId !== req.claims.sub || anterior.items !== firmas) return res.status(409).json({ error: { code: "CONFLICT", message: "Identificador de combinación ya utilizado." } });
+    return res.json(respuestaCarrito(lineasCarrito(req)));
+  }
+  const lineas = lineasCarrito(req).map(linea => ({ ...linea }));
+  for (const item of items) {
+    if (!router.db.get("books").find({ id: item.bookId }).value()) return errorCarrito(res, 404, `Libro no encontrado: ${item.bookId}.`);
+    const existente = lineas.find(linea => linea.bookId === item.bookId);
+    if (existente) {
+      if (!cantidadValida(existente.quantity + item.quantity)) return errorCarrito(res, 400, "La cantidad combinada no puede superar 99.");
+      existente.quantity += item.quantity;
+    } else lineas.push({ bookId: item.bookId, quantity: item.quantity });
+  }
+  const carritos = router.db.get("carts").value() || {};
+  router.db.assign({ carts: { ...carritos, [req.claims.sub]: lineas }, cartMerges: { ...operaciones, [mergeId]: { userId: req.claims.sub, items: firmas } } }).write();
+  return res.json(respuestaCarrito(lineas));
 });
 
 // Adaptamos la paginación de JSON Server al contrato que seguirá Spring.

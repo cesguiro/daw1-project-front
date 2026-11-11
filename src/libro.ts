@@ -1,6 +1,6 @@
-import { anadirAlCarrito, ErrorApi, obtenerLibro, obtenerResenas } from "./api.js";
+import { ErrorApi, obtenerLibro, obtenerResenas } from "./api.js";
 import { crearPrecio, crearPuntuacion, crearResena } from "./vista.js";
-import { obtenerToken } from "./sesion.js";
+import { anadir } from "./gestion-carrito.js";
 
 function porId<T extends HTMLElement>(id: string): T {
   const resultado = document.getElementById(id);
@@ -35,23 +35,15 @@ async function cargarDetalle(): Promise<void> {
     boton.disabled = false;
     boton.addEventListener("click", async () => {
       const mensaje = porId("cart-message");
-      const token = obtenerToken();
-      if (!token) {
-        mensaje.replaceChildren(document.createTextNode("Para añadir libros, "));
-        const enlace = document.createElement("a");
-        enlace.href = "login.html";
-        enlace.textContent = "inicia sesión";
-        mensaje.append(enlace, document.createTextNode("."));
-        return;
-      }
       boton.disabled = true;
       try {
-        await anadirAlCarrito(token, libro.id);
+        await anadir(libro.id);
         mensaje.textContent = "Libro añadido al carrito.";
       } catch (error) {
         mensaje.textContent = error instanceof ErrorApi && error.status === 401
           ? "La sesión ha caducado. Inicia sesión de nuevo."
-          : "No se ha podido añadir el libro. Comprueba la conexión o la cantidad máxima (99).";
+          : error instanceof ErrorApi ? "No se ha podido añadir el libro. Comprueba la conexión o la cantidad máxima (99)."
+          : error instanceof Error ? error.message : "No se ha podido añadir el libro.";
       } finally { boton.disabled = false; }
     });
     estado.hidden = true;

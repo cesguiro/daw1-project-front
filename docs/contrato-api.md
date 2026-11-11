@@ -1,6 +1,6 @@
 # Contrato inicial de la API
 
-Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo, el detalle, la consulta de reseñas, el login, el registro y el carrito de usuarios identificados; las demás rutas se incorporarán en sus fases correspondientes.
+Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo, el detalle, la consulta de reseñas, el login, el registro y el carrito; las demás rutas se incorporarán en sus fases correspondientes.
 
 ## Convenciones
 
@@ -8,7 +8,7 @@ Propuesta para coordinar el front y el back de la librería. La simulación impl
 - Los identificadores de libros y pedidos son cadenas. En la simulación actual, los identificadores de usuarios son numéricos. Las fechas incluyen zona horaria y usan ISO 8601, por ejemplo `2025-03-20T10:00:00Z`.
 - Los importes son números enteros en **céntimos de euro**: `1196` equivale a 11,96 €. Los descuentos son porcentajes enteros de 0 a 100.
 - Las rutas protegidas requieren `Authorization: Bearer <token>`. El servidor determina el usuario a partir del token; no acepta un identificador de usuario enviado por el cliente para seleccionar sus pedidos.
-- El carrito de un usuario identificado se guarda en el servidor, asociado al usuario del token. Los invitados necesitarán iniciar sesión hasta la siguiente fase.
+- El carrito de un usuario identificado se guarda en el servidor, asociado al usuario del token. El carrito de invitado se guarda en el navegador y se combina al iniciar sesión.
 
 ## Usuarios y sesión
 
@@ -133,6 +133,20 @@ Todas las rutas requieren `Authorization: Bearer <token>` y operan exclusivament
 - `DELETE /api/cart/items/{bookId}` elimina la línea.
 
 Las operaciones devuelven el carrito actualizado. Las cantidades son enteros de 1 a 99; superar el límite devuelve `400` sin modificarlo. Un libro o línea inexistente devuelve `404`. Los precios mostrados son orientativos; la compra debe calcularlos en el servidor. La API simulada guarda carritos en `data/db.local.json`, solo para desarrollo local.
+
+### Combinar el carrito de invitado
+
+`POST /api/cart/merge` requiere login y recibe, por ejemplo:
+
+```json
+{ "mergeId": "f4509828-1638-4fe2-9ec0-67a2e8c561cb", "items": [{ "bookId": "b01", "quantity": 2 }] }
+```
+
+El servidor suma las cantidades a las líneas existentes e incorpora los libros nuevos; devuelve el carrito actualizado. Valida todas las líneas antes de modificarlo (hasta 100 libros distintos, cantidades de 1 a 99, libros existentes y sin identificadores duplicados). Si una suma supera 99, rechaza la operación completa con `400`; si un libro no existe, devuelve `404`. El cliente conserva el carrito local para corregirlo.
+
+`mergeId` identifica la operación, no el carrito. El servidor guarda el resultado de la operación junto a su identidad y contenido: un reintento con el mismo identificador, usuario y líneas no vuelve a sumar y devuelve el carrito actual. Reutilizar el identificador con otro usuario o contenido devuelve `409`. El cliente guarda el identificador y las líneas antes de enviarlas y solo elimina el pendiente al recibir confirmación; si la respuesta se pierde, reintenta con la misma cuenta. El registro no inicia sesión ni elimina el carrito local.
+
+La implementación simulada escribe los carritos y los identificadores de combinación en el mismo archivo local. Un back real debe implementar la combinación y la reserva del identificador como una transacción persistente y gestionar la concurrencia; la simulación no está preparada para producción.
 
 ## Pedidos
 

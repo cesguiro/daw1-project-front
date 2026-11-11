@@ -1,12 +1,13 @@
 {
   "name": "entre-paginas",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
     "api": "node scripts/servidor-api.cjs",
-    "test": "node --test tests/*.test.cjs"
+    "test": "npm run build && node --test tests/*.test.cjs"
   },
   "devDependencies": {
     "typescript": "5.9.3",

@@ -14,7 +14,8 @@
     <nav class="site-nav" aria-label="Navegación principal">
       <a class="nav-link" href="index.html">Catálogo</a>
       <a class="nav-link" href="login.html" data-sesion-invitado hidden>Iniciar sesión</a>
-      <details class="account-menu" data-sesion-activa hidden><summary class="nav-link">Mi cuenta</summary><div class="account-links"><a href="pedidos.html">Mis pedidos</a><a href="carrito.html" aria-current="page">Carrito</a><button type="button" data-cerrar-sesion>Cerrar sesión</button></div></details>
+      <a class="nav-link" href="carrito.html" aria-current="page">Carrito</a>
+      <details class="account-menu" data-sesion-activa hidden><summary class="nav-link">Mi cuenta</summary><div class="account-links"><a href="pedidos.html">Mis pedidos</a><button type="button" data-cerrar-sesion>Cerrar sesión</button></div></details>
       <noscript><a class="nav-link" href="login.html">Iniciar sesión</a></noscript>
     </nav>
   </div></header>
@@ -30,6 +31,7 @@
       <aside class="panel" aria-labelledby="cart-summary-title">
         <h2 id="cart-summary-title">Resumen</h2>
         <dl class="summary-list"><div><dt>Libros</dt><dd id="cart-count">0</dd></div><div class="summary-total"><dt>Total orientativo</dt><dd id="cart-total">0 €</dd></div></dl>
+        <p id="cart-login" hidden><a href="login.html">Inicia sesión o regístrate</a> para guardar el carrito en tu cuenta.</p>
         <p class="demo-note">La compra y los pedidos todavía no están disponibles. Los precios son ficticios y pueden cambiar.</p>
       </aside>
     </div>

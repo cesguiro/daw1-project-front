@@ -36,7 +36,9 @@ async function actualizarCabecera(): Promise<void> {
 botonSalir?.addEventListener("click", () => {
   cerrarSesion();
   mostrarSesion(false);
+  window.dispatchEvent(new Event("sesion-cerrada"));
   if (menuCuenta instanceof HTMLDetailsElement) menuCuenta.open = false;
 });
 
+window.addEventListener("sesion-iniciada", () => mostrarSesion(true));
 void actualizarCabecera();
