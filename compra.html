@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compra | Entre páginas</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header"><div class="container header-content">
+    <a class="brand" href="index.html" aria-label="Entre páginas, inicio"><span class="brand-mark" aria-hidden="true">ep</span><span>entre páginas</span></a>
+    <nav class="site-nav" aria-label="Navegación principal">
+      <a class="nav-link" href="index.html">Catálogo</a><a class="nav-link" href="carrito.html" aria-current="page">Carrito</a><a class="nav-link" href="pedidos.html">Mis pedidos</a><a class="nav-link" href="login.html">Iniciar sesión</a><a class="nav-link" href="registro.html">Registro</a>
+    </nav>
+  </div></header>
+  <main class="container page">
+    <a class="back-link" href="carrito.html"><span aria-hidden="true">←</span> Volver al carrito</a>
+    <div class="page-heading"><p class="eyebrow">ÚLTIMO PASO</p><h1>Confirmar compra</h1><p class="page-intro">Esta pantalla muestra cómo sería una compra de ejemplo. No introduce ningún pago real.</p></div>
+    <div class="two-column">
+      <section class="panel" aria-labelledby="payment-title">
+        <h2 id="payment-title">Pago simulado</h2>
+        <p class="demo-note">No utilices datos de tarjetas reales. Estos campos son una maqueta deshabilitada y no se envían ni se guardan.</p>
+        <form class="checkout-fields">
+          <fieldset class="form-fields" disabled>
+            <div class="field"><label for="card-name">Nombre en la tarjeta ficticia</label><input id="card-name" name="cardName" type="text"></div>
+            <div class="field"><label for="card-number">Número de tarjeta ficticia</label><input id="card-number" name="cardNumber" type="text" inputmode="numeric"></div>
+            <div class="field"><label for="card-expiry">Caducidad ficticia</label><input id="card-expiry" name="cardExpiry" type="text" placeholder="MM/AA"></div>
+          </fieldset>
+          <button class="button" type="submit" disabled>Confirmar pedido <span aria-hidden="true">→</span></button>
+        </form>
+      </section>
+      <aside class="panel" aria-labelledby="checkout-summary-title">
+        <h2 id="checkout-summary-title">Resumen del pedido</h2>
+        <dl class="summary-list"><div><dt>Los juegos del hambre × 1</dt><dd>11,96 €</dd></div><div><dt>El principito × 1</dt><dd>12,76 €</dd></div><div class="summary-total"><dt>Total</dt><dd>24,72 €</dd></div></dl>
+        <p class="demo-note">Los libros y precios son ficticios. La compra necesitará una cuenta cuando esté disponible.</p>
+      </aside>
+    </div>
+  </main>
+  <footer class="site-footer"><div class="container footer-content"><p class="footer-brand">entre páginas</p><p>Una librería de ejemplo para aprender creando.</p></div></footer>
+</body>
+</html>

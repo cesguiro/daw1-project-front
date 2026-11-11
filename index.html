@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Un pequeño catálogo de libros para descubrir tu próxima lectura.">
+  <title>Catálogo | Entre páginas</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-content">
+      <a class="brand" href="index.html" aria-label="Entre páginas, inicio">
+        <span class="brand-mark" aria-hidden="true">ep</span>
+        <span>entre páginas</span>
+      </a>
+      <nav class="site-nav" aria-label="Navegación principal">
+        <a class="nav-link" href="index.html" aria-current="page">Catálogo</a>
+        <a class="nav-link" href="carrito.html">Carrito</a>
+        <a class="nav-link" href="pedidos.html">Mis pedidos</a>
+        <a class="nav-link" href="login.html">Iniciar sesión</a>
+        <a class="nav-link" href="registro.html">Registro</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-content">
+        <p class="eyebrow">UNA HISTORIA PARA CADA MOMENTO</p>
+        <h1>Tu próxima aventura <em>empieza aquí</em></h1>
+        <p>Historias que te llevan lejos, personajes que se quedan contigo y libros a los que siempre querrás volver.</p>
+        <a class="text-link" href="#catalogo">Explorar los libros <span aria-hidden="true">↓</span></a>
+      </div>
+      <span class="hero-decoration" aria-hidden="true">&amp;</span>
+    </section>
+
+    <section class="catalog-section container" id="catalogo" aria-labelledby="catalog-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">ELIGE TU PRÓXIMA LECTURA</p>
+          <h2 id="catalog-title">Nuestro catálogo</h2>
+        </div>
+        <p class="section-note">Una pequeña selección de grandes historias.</p>
+      </div>
+
+      <div class="book-grid">
+        <article class="book-card">
+          <a class="cover-link" href="libro.html" aria-label="Ver detalle de Los juegos del hambre">
+            <div class="book-cover"><img src="https://images.cesguiro.es/books/9780439023528.webp" alt="Portada de Los juegos del hambre" width="240" height="360"></div>
+          </a>
+          <div class="book-info">
+            <p class="book-category">Ciencia ficción</p>
+            <h3><a href="libro.html">Los juegos del hambre</a></h3>
+            <p class="book-author">Suzanne Collins</p>
+            <p class="rating"><span class="stars" aria-hidden="true">★★★★☆</span> <span>4,3 de 5 · 6 reseñas</span></p>
+            <p class="book-price"><span class="visually-hidden">Precio actual: </span><span class="sale-price">11,96 €</span> <span class="visually-hidden">Precio anterior: </span><del class="original-price">14,95 €</del> <span class="discount">−20 %</span></p>
+            <a class="book-detail-link" href="libro.html">Ver detalle <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+
+        <article class="book-card">
+          <div class="book-cover"><img src="https://images.cesguiro.es/books/9780261103573.webp" alt="Portada de La comunidad del anillo" width="240" height="360" loading="lazy"></div>
+          <div class="book-info">
+            <p class="book-category">Fantasía</p>
+            <h3>La comunidad del anillo</h3>
+            <p class="book-author">J. R. R. Tolkien</p>
+            <p class="rating"><span class="stars" aria-hidden="true">★★★★★</span> <span>5 de 5 · 2 reseñas</span></p>
+            <p class="book-price">16,50 €</p>
+          </div>
+        </article>
+
+        <article class="book-card">
+          <div class="book-cover"><img src="https://images.cesguiro.es/books/9781451673319.jpg" alt="Portada de El cuento de Ferdinando" width="240" height="360" loading="lazy"></div>
+          <div class="book-info">
+            <p class="book-category">Literatura infantil</p>
+            <h3>El cuento de Ferdinando</h3>
+            <p class="book-author">Munro Leaf</p>
+            <p class="rating rating-empty">Sin reseñas</p>
+            <p class="book-price">13,95 €</p>
+          </div>
+        </article>
+
+        <article class="book-card">
+          <div class="book-cover"><img src="https://images.cesguiro.es/books/9780142424179.webp" alt="Portada de El principito" width="240" height="360" loading="lazy"></div>
+          <div class="book-info">
+            <p class="book-category">Literatura infantil</p>
+            <h3>El principito</h3>
+            <p class="book-author">Antoine de Saint-Exupéry</p>
+            <p class="rating"><span class="stars" aria-hidden="true">★★★★☆</span> <span>4 de 5 · 1 reseña</span></p>
+            <p class="book-price"><span class="visually-hidden">Precio actual: </span><span class="sale-price">12,76 €</span> <span class="visually-hidden">Precio anterior: </span><del class="original-price">15,95 €</del> <span class="discount">−20 %</span></p>
+          </div>
+        </article>
+
+        <article class="book-card">
+          <div class="book-cover"><img src="https://images.cesguiro.es/books/9780142424180.webp" alt="Portada de Bajo la misma estrella" width="240" height="360" loading="lazy"></div>
+          <div class="book-info">
+            <p class="book-category">Novela</p>
+            <h3>Bajo la misma estrella</h3>
+            <p class="book-author">John Green</p>
+            <p class="rating rating-empty">Sin reseñas</p>
+            <p class="book-price">12,95 €</p>
+          </div>
+        </article>
+
+        <article class="book-card">
+          <div class="book-cover"><img src="https://images.cesguiro.es/books/9780439554930.webp" alt="Portada de Harry Potter y la piedra filosofal" width="240" height="360" loading="lazy"></div>
+          <div class="book-info">
+            <p class="book-category">Fantasía</p>
+            <h3>Harry Potter y la piedra filosofal</h3>
+            <p class="book-author">J. K. Rowling</p>
+            <p class="rating"><span class="stars" aria-hidden="true">★★★★★</span> <span>5 de 5 · 1 reseña</span></p>
+            <p class="book-price">17,50 €</p>
+          </div>
+        </article>
+      </div>
+      <p class="demo-note">Catálogo de ejemplo. Los precios y las valoraciones son ficticios y, por ahora, solo está disponible el detalle de Los juegos del hambre.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <p class="footer-brand">entre páginas</p>
+      <p>Una librería de ejemplo para aprender creando.</p>
+    </div>
+  </footer>
+</body>
+</html>
