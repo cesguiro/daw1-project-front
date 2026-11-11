@@ -6,6 +6,7 @@
   <title>Mis pedidos | Entre páginas</title>
   <link rel="stylesheet" href="css/styles.css">
   <script type="module" src="js/cabecera.js"></script>
+  <script type="module" src="js/pedidos.js"></script>
 </head>
 <body>
   <header class="site-header"><div class="container header-content">
@@ -20,13 +21,11 @@
   </div></header>
   <main class="container page">
     <div class="page-heading"><p class="eyebrow">TUS COMPRAS</p><h1>Mis pedidos</h1><p>Aquí podrás consultar los pedidos realizados con tu cuenta.</p></div>
-    <div class="order-list">
-      <article class="panel order-card">
-        <div><h2>Pedido #1001</h2><p><time datetime="2025-03-20">20 de marzo de 2025</time> · 2 libros · Total: 24,72 €</p></div>
-        <a class="book-detail-link" href="pedido.html">Ver detalle <span aria-hidden="true">↗</span></a>
-      </article>
-    </div>
-    <p class="demo-note">Pedido ficticio para mostrar la pantalla. Cuando la aplicación funcione, solo podrás consultar tus propios pedidos tras iniciar sesión.</p>
+    <p id="orders-status" role="status">Cargando pedidos...</p>
+    <p id="orders-login" hidden><a href="login.html">Inicia sesión</a> para consultar tus pedidos.</p>
+    <noscript>Activa JavaScript para consultar tus pedidos.</noscript>
+    <div class="order-list" id="orders-list"></div>
+    <p class="demo-note">Los pedidos y pagos son ficticios y solo se guardan en la API simulada.</p>
   </main>
   <footer class="site-footer"><div class="container footer-content"><p class="footer-brand">entre páginas</p><p>Una librería de ejemplo para aprender creando.</p></div></footer>
 </body>

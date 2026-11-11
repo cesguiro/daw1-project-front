@@ -9,10 +9,12 @@ const listado = document.querySelector<HTMLElement>("#cart-items")!;
 const cuenta = document.querySelector<HTMLElement>("#cart-count")!;
 const total = document.querySelector<HTMLElement>("#cart-total")!;
 const acceso = document.querySelector<HTMLElement>("#cart-login")!;
+const compra = document.querySelector<HTMLElement>("#cart-checkout")!;
 
 function mostrar(carrito: Carrito): void {
   contenido.hidden = false;
   acceso.hidden = Boolean(obtenerToken()) || carrito.items.length === 0;
+  compra.hidden = carrito.items.length === 0 || carrito.items.some(linea => !linea.book);
   estado.textContent = carrito.items.length ? "" : "Tu carrito está vacío.";
   listado.replaceChildren(...carrito.items.map(crearLinea));
   cuenta.textContent = String(carrito.items.reduce((suma, linea) => suma + linea.quantity, 0));

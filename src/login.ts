@@ -6,6 +6,8 @@ const formulario = document.querySelector<HTMLFormElement>("#login-form")!;
 const mensaje = document.querySelector<HTMLParagraphElement>("#login-message")!;
 const boton = document.querySelector<HTMLButtonElement>("#login-submit")!;
 const campos = document.querySelector<HTMLFieldSetElement>("#login-fields")!;
+const continuarCompra = new URLSearchParams(window.location.search).get("next") === "compra";
+if (continuarCompra) document.querySelector<HTMLAnchorElement>("a[href='registro.html']")!.href = "registro.html?next=compra";
 
 if (new URLSearchParams(window.location.search).get("registro") === "ok") {
   mensaje.textContent = "Cuenta creada. Ya puedes iniciar sesión.";
@@ -25,7 +27,7 @@ formulario.addEventListener("submit", async (evento) => {
     window.dispatchEvent(new Event("sesion-iniciada"));
     try {
       const combinado = await sincronizarInvitado(resultado.accessToken, userId);
-      window.location.href = combinado ? "carrito.html" : "index.html";
+      window.location.href = continuarCompra ? "compra.html" : combinado ? "carrito.html" : "index.html";
     } catch (error) {
       mensaje.textContent = error instanceof Error ? error.message : "No se ha podido combinar el carrito.";
       return;

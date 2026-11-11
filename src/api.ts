@@ -4,7 +4,7 @@ import type { Libro, Pagina, Resena } from "./libros.js";
 const API_URL = "http://localhost:3000/api";
 
 export class ErrorApi extends Error {
-  constructor(public status: number) {
+  constructor(public status: number, public code?: string) {
     super(`La API respondió con el estado ${status}`);
   }
 }
@@ -22,6 +22,34 @@ export interface LineaCarrito {
 
 export interface Carrito { items: LineaCarrito[]; }
 export interface LineaLocal { bookId: string; quantity: number; }
+export interface LineaPedidoSolicitud extends LineaLocal { expectedPriceCents: number; }
+export interface PagoFicticio { name: string; number: string; expiry: string; cvv: string; }
+export interface ResumenPedido { id: string; createdAt: string; itemCount: number; totalCents: number; }
+export interface Pedido extends ResumenPedido {
+  items: { bookId: string; title: string; author: string; coverUrl: string; quantity: number; unitPriceCents: number; subtotalCents: number }[];
+}
+
+async function peticionPedidos<T>(token: string, ruta = "", datos?: object): Promise<T> {
+  const respuesta = await fetch(`${API_URL}/orders${ruta}`, {
+    method: datos ? "POST" : "GET",
+    headers: { Authorization: `Bearer ${token}`, ...(datos ? { "Content-Type": "application/json" } : {}) },
+    ...(datos ? { body: JSON.stringify(datos) } : {})
+  });
+  if (!respuesta.ok) {
+    let code: string | undefined;
+    try { code = ((await respuesta.json()) as { error?: { code?: string } }).error?.code; } catch { /* La API puede no devolver JSON. */ }
+    throw new ErrorApi(respuesta.status, code);
+  }
+  return respuesta.json() as Promise<T>;
+}
+export function crearPedido(token: string, requestId: string, items: LineaPedidoSolicitud[], payment: PagoFicticio): Promise<Pedido> {
+  return peticionPedidos(token, "", { requestId, items, payment });
+}
+export function obtenerPedidoPorSolicitud(token: string, requestId: string): Promise<Pedido> {
+  return peticionPedidos(token, `/by-request/${encodeURIComponent(requestId)}`);
+}
+export function obtenerPedido(token: string, id: string): Promise<Pedido> { return peticionPedidos(token, `/${encodeURIComponent(id)}`); }
+export function obtenerPedidos(token: string): Promise<ResumenPedido[]> { return peticionPedidos(token); }
 
 async function peticionCarrito(token: string, ruta = "", method = "GET", datos?: object): Promise<Carrito> {
   const respuesta = await fetch(`${API_URL}/cart${ruta}`, {

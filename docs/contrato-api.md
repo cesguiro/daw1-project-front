@@ -1,6 +1,6 @@
 # Contrato inicial de la API
 
-Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo, el detalle, la consulta de reseñas, el login, el registro y el carrito; las demás rutas se incorporarán en sus fases correspondientes.
+Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo, el detalle, la consulta de reseñas, el login, el registro, el carrito y los pedidos con pago ficticio. La publicación de reseñas queda para otra fase.
 
 ## Convenciones
 
@@ -159,12 +159,22 @@ Todas estas rutas requieren login. Solo se pueden consultar los pedidos del usua
 Petición:
 
 ```json
-{ "items": [ { "bookId": "b01", "quantity": 1 }, { "bookId": "b04", "quantity": 1 } ] }
+{
+  "requestId": "b9a15126-31d0-41e9-83e4-2b7882e199e6",
+  "items": [ { "bookId": "b01", "quantity": 1, "expectedPriceCents": 1196 } ],
+  "payment": { "name": "Nombre ficticio", "number": "4242424242424242", "expiry": "12/99", "cvv": "123" }
+}
 ```
 
-Las cantidades son enteros positivos. El servidor obtiene los precios actuales, aplica los descuentos, calcula el total y asocia el pedido al usuario. No confía en precios ni totales enviados por el cliente. No hay gastos de envío ni gestión de stock en esta versión.
+Las líneas deben coincidir con el carrito actual del usuario y las cantidades son enteros de 1 a 99. El servidor obtiene los libros y precios actuales, comprueba que coincidan con `expectedPriceCents` y calcula el total: el precio enviado solo permite detectar cambios, no determinar el importe. Si el carrito o los precios han cambiado, devuelve `409 CART_CHANGED` sin crear el pedido; el usuario debe revisar el resumen. No hay gastos de envío ni gestión de stock en esta versión.
 
-Respuesta `201 Created`: devuelve el detalle completo del pedido con la estructura de `GET /api/orders/{orderId}`. La operación es una simulación: no se procesan pagos reales. Los campos de tarjeta de la maqueta no forman parte de esta petición y no se envían ni guardan.
+Respuesta `201 Created`: devuelve el detalle completo del pedido con la estructura de `GET /api/orders/{orderId}` y vacía el carrito en la misma escritura local. La operación es una simulación: no se procesan pagos reales. La tarjeta ficticia se comprueba durante la petición y no se guarda en el pedido, el archivo de datos ni el almacenamiento del navegador. No se deben introducir datos reales ni exponer la API simulada.
+
+Solo se aceptan estos números de prueba (16 dígitos sin espacios en la petición): `4242424242424242` acepta; `4000000000000002` devuelve `402 CARD_DECLINED`; `4000000000009995` devuelve `402 ACCOUNT_NOT_FOUND`. Cualquier otro número, campo incorrecto o fecha caducada devuelve `400 INVALID_CARD`. El nombre debe tener de 1 a 100 caracteres no vacíos, la caducidad sigue `MM/AA` y el código de seguridad ficticio tiene tres dígitos. Los rechazos no crean pedido ni vacían el carrito.
+
+`requestId` identifica el intento para el usuario autenticado. Al repetir un pedido ya aceptado con el mismo identificador y líneas, el servidor devuelve `200` con el pedido original, sin crear otro ni vaciar un carrito posterior. Si las líneas son distintas, devuelve `409 REQUEST_CONFLICT`. `GET /api/orders/by-request/{requestId}` permite recuperar el resultado del usuario autenticado o devuelve `404`. Antes de enviar, el front guarda el identificador, el usuario y las líneas en `sessionStorage` —nunca la tarjeta— para poder comprobar el resultado si se pierde la respuesta. Si se cierra la pestaña, se puede comprobar el historial de pedidos.
+
+La API simulada escribe pedido y carrito en su archivo local; un back real necesitaría transacciones, protección contra reintentos y un proveedor de pagos adecuado. Esta simulación no es un sistema de pagos ni sirve para procesar tarjetas reales.
 
 ### Listado de mis pedidos
 
@@ -223,8 +233,9 @@ Las respuestas de error usan esta estructura:
 
 - `400`: datos inválidos.
 - `401`: credenciales incorrectas o token ausente, inválido o caducado.
+- `402`: tarjeta ficticia rechazada o cuenta ficticia inexistente.
 - `404`: libro o pedido no encontrado; también se usa si el pedido pertenece a otra persona.
-- `409`: correo ya registrado o reseña duplicada.
+- `409`: correo ya registrado, reseña duplicada o conflicto en el carrito o identificador de pedido.
 - `500`: error inesperado del servidor.
 
 Estos errores son la propuesta para el back real. `json-server-auth` devuelve errores como cadenas JSON y utiliza `400` tanto para credenciales incorrectas como para correos ya registrados.
@@ -233,4 +244,4 @@ Estos errores son la propuesta para el back real. `json-server-auth` devuelve er
 
 JSON Server puede servir como punto de partida para los datos, pero **no implementa por sí solo este contrato completo**: hacen falta lógica adicional para el login con tokens, las restricciones por usuario, los cálculos de pedidos, la media de reseñas y las respuestas propuestas. Podría usarse un pequeño servidor simulado en su lugar. Ninguna de estas medidas convierte la simulación en un sistema listo para producción.
 
-La simulación actual adapta la paginación de JSON Server al contrato de `/api/books`, implementa el carrito y utiliza `json-server-auth` para el login. Es únicamente para desarrollo local: el complemento utiliza una clave JWT fija y conocida, por lo que no es seguro exponerlo. Los precios finales, medias y recuentos se mantienen en los datos de ejemplo; no se calculan automáticamente.
+La simulación actual adapta la paginación de JSON Server al contrato de `/api/books`, implementa el carrito y los pedidos ficticios y utiliza `json-server-auth` para el login. Es únicamente para desarrollo local: el complemento utiliza una clave JWT fija y conocida, por lo que no es seguro exponerlo. Los precios finales, medias y recuentos se mantienen en los datos de ejemplo; no se calculan automáticamente.

@@ -4,6 +4,8 @@ const formulario = document.querySelector<HTMLFormElement>("#register-form")!;
 const mensaje = document.querySelector<HTMLParagraphElement>("#register-message")!;
 const boton = document.querySelector<HTMLButtonElement>("#register-submit")!;
 const campos = document.querySelector<HTMLFieldSetElement>("#register-fields")!;
+const continuarCompra = new URLSearchParams(window.location.search).get("next") === "compra";
+if (continuarCompra) document.querySelector<HTMLAnchorElement>(".form-note a")!.href = "login.html?next=compra";
 
 formulario.addEventListener("submit", async (evento) => {
   evento.preventDefault();
@@ -24,7 +26,7 @@ formulario.addEventListener("submit", async (evento) => {
   try {
     await registrarUsuario(name, email, password);
     // El servidor devuelve un token al registrar, pero pedimos iniciar sesión aparte.
-    window.location.href = "login.html?registro=ok";
+    window.location.href = continuarCompra ? "login.html?registro=ok&next=compra" : "login.html?registro=ok";
   } catch (error) {
     console.error("No se pudo crear la cuenta:", error);
     mensaje.textContent = error instanceof ErrorApi && error.status === 400

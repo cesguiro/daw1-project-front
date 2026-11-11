@@ -1,5 +1,6 @@
 const path = require("node:path");
 const fs = require("node:fs");
+const { randomUUID } = require("node:crypto");
 const cors = require("cors");
 const jsonServer = require("json-server");
 const auth = require("json-server-auth");
@@ -20,7 +21,9 @@ servidor.use((req, res, next) => {
   const sesion = req.path === "/api/session";
   const autenticacion = req.path === "/api/login" || req.path === "/api/register";
   const carrito = /^\/api\/cart(?:\/items(?:\/[^/]+)?|\/merge)?\/?$/.test(req.path);
+  const pedidos = /^\/api\/orders(?:\/(?:by-request\/)?[^/]+)?\/?$/.test(req.path);
   if (carrito && ["GET", "POST", "PATCH", "DELETE"].includes(req.method)) return next();
+  if (pedidos && (lectura || req.method === "POST")) return next();
   if ((lectura && (libros || sesion)) || (req.method === "POST" && autenticacion)) {
     if (autenticacion) {
       const { name, email, password } = req.body || {};
@@ -36,7 +39,7 @@ servidor.use((req, res, next) => {
 });
 
 // La sesión se comprueba sin que el front tenga que leer el contenido del token.
-servidor.use(auth.rewriter({ "/api/login": "/login", "/api/register": "/register", "/api/session": "/660/session", "/api/cart*": "/660/cart$1" }));
+servidor.use(auth.rewriter({ "/api/login": "/login", "/api/register": "/register", "/api/session": "/660/session", "/api/cart*": "/660/cart$1", "/api/orders*": "/660/orders$1" }));
 servidor.use(auth);
 servidor.get("/session", (_req, res) => res.json({ active: true }));
 
@@ -120,6 +123,78 @@ servidor.post("/cart/merge", (req, res) => {
   const carritos = router.db.get("carts").value() || {};
   router.db.assign({ carts: { ...carritos, [req.claims.sub]: lineas }, cartMerges: { ...operaciones, [mergeId]: { userId: req.claims.sub, items: firmas } } }).write();
   return res.json(respuestaCarrito(lineas));
+});
+
+// Los números de prueba nunca representan cuentas reales ni se guardan.
+function pagoSimulado(payment) {
+  if (!payment || typeof payment.name !== "string" || !payment.name.trim() || payment.name.length > 100 ||
+      typeof payment.number !== "string" || !/^\d{16}$/.test(payment.number) ||
+      typeof payment.expiry !== "string" || !/^(0[1-9]|1[0-2])\/\d{2}$/.test(payment.expiry) ||
+      typeof payment.cvv !== "string" || !/^\d{3}$/.test(payment.cvv)) return "INVALID_CARD";
+  const [mes, ano] = payment.expiry.split("/").map(Number);
+  const ahora = new Date();
+  if (2000 + ano < ahora.getFullYear() || (2000 + ano === ahora.getFullYear() && mes < ahora.getMonth() + 1)) return "INVALID_CARD";
+  if (payment.number === "4242424242424242") return null;
+  if (payment.number === "4000000000000002") return "CARD_DECLINED";
+  if (payment.number === "4000000000009995") return "ACCOUNT_NOT_FOUND";
+  return "INVALID_CARD";
+}
+function pedidoPublico(pedido) {
+  const { userId, requestId, requestItems, ...publico } = pedido;
+  return publico;
+}
+function errorPedido(res, status, code, message) {
+  return res.status(status).json({ error: { code, message } });
+}
+servidor.get("/orders", (req, res) => {
+  const pedidos = (router.db.get("orders").value() || []).filter(pedido => pedido.userId === req.claims.sub)
+    .slice().reverse().map(({ id, createdAt, itemCount, totalCents }) => ({ id, createdAt, itemCount, totalCents }));
+  return res.json(pedidos);
+});
+servidor.get("/orders/by-request/:id", (req, res) => {
+  const pedido = (router.db.get("orders").value() || []).find(item => item.userId === req.claims.sub && item.requestId === req.params.id);
+  return pedido ? res.json(pedidoPublico(pedido)) : errorPedido(res, 404, "NOT_FOUND", "Pedido no encontrado.");
+});
+servidor.get("/orders/:id", (req, res) => {
+  const pedido = (router.db.get("orders").value() || []).find(item => item.userId === req.claims.sub && item.id === req.params.id);
+  return pedido ? res.json(pedidoPublico(pedido)) : errorPedido(res, 404, "NOT_FOUND", "Pedido no encontrado.");
+});
+servidor.post("/orders", (req, res) => {
+  const { requestId, items, payment } = req.body || {};
+  if (typeof requestId !== "string" || !/^[a-zA-Z0-9-]{1,100}$/.test(requestId) || !Array.isArray(items) || !items.length || items.length > 100) {
+    return errorPedido(res, 400, "VALIDATION_ERROR", "Pedido no válido.");
+  }
+  const ids = new Set();
+  for (const item of items) {
+    if (!item || typeof item.bookId !== "string" || ids.has(item.bookId) || !cantidadValida(item.quantity) || !Number.isSafeInteger(item.expectedPriceCents) || item.expectedPriceCents < 0) {
+      return errorPedido(res, 400, "VALIDATION_ERROR", "Líneas del pedido no válidas.");
+    }
+    ids.add(item.bookId);
+  }
+  const lineasSolicitadas = items.map(({ bookId, quantity, expectedPriceCents }) => ({ bookId, quantity, expectedPriceCents })).sort((a, b) => a.bookId.localeCompare(b.bookId));
+  const firma = JSON.stringify(lineasSolicitadas);
+  const pedidos = router.db.get("orders").value() || [];
+  const anterior = pedidos.find(item => item.userId === req.claims.sub && item.requestId === requestId);
+  if (anterior) return anterior.requestItems === firma ? res.json(pedidoPublico(anterior)) : errorPedido(res, 409, "REQUEST_CONFLICT", "Identificador ya utilizado para otro pedido.");
+
+  const carrito = lineasCarrito(req);
+  if (carrito.length !== items.length || carrito.some(linea => !items.some(item => item.bookId === linea.bookId && item.quantity === linea.quantity))) {
+    return errorPedido(res, 409, "CART_CHANGED", "El carrito ha cambiado. Revisa el pedido.");
+  }
+  const lineas = [];
+  for (const item of items) {
+    const libro = router.db.get("books").find({ id: item.bookId }).value();
+    if (!libro || libro.finalPriceCents !== item.expectedPriceCents) return errorPedido(res, 409, "CART_CHANGED", "Los libros o precios han cambiado. Revisa el pedido.");
+    lineas.push({ bookId: libro.id, title: libro.title, author: libro.author, coverUrl: libro.coverUrl, quantity: item.quantity, unitPriceCents: libro.finalPriceCents, subtotalCents: libro.finalPriceCents * item.quantity });
+  }
+  const resultado = pagoSimulado(payment);
+  if (resultado === "INVALID_CARD") return errorPedido(res, 400, resultado, "Datos de tarjeta ficticia no válidos o caducados.");
+  if (resultado === "CARD_DECLINED") return errorPedido(res, 402, resultado, "La tarjeta ficticia ha sido rechazada.");
+  if (resultado === "ACCOUNT_NOT_FOUND") return errorPedido(res, 402, resultado, "No existe una cuenta ficticia para esa tarjeta.");
+  const pedido = { id: randomUUID(), userId: req.claims.sub, requestId, requestItems: firma, createdAt: new Date().toISOString(), itemCount: lineas.reduce((suma, item) => suma + item.quantity, 0), items: lineas, totalCents: lineas.reduce((suma, item) => suma + item.subtotalCents, 0) };
+  const carritos = router.db.get("carts").value() || {};
+  router.db.assign({ orders: [...pedidos, pedido], carts: { ...carritos, [req.claims.sub]: [] } }).write();
+  return res.status(201).json(pedidoPublico(pedido));
 });
 
 // Adaptamos la paginación de JSON Server al contrato que seguirá Spring.

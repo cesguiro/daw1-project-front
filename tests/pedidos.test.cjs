@@ -1,0 +1,72 @@
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const { spawn } = require("node:child_process");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const net = require("node:net");
+
+test("compra simulada: validación, privacidad, aislamiento y reintentos", async t => {
+  const directorio = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), "entre-paginas-pedidos-"));
+  const db = path.join(directorio, "db.json");
+  const puerto = await new Promise((resolve, reject) => {
+    const servidor = net.createServer();
+    servidor.once("error", reject);
+    servidor.listen(0, "127.0.0.1", () => { const port = servidor.address().port; servidor.close(() => resolve(port)); });
+  });
+  const proceso = spawn(process.execPath, ["scripts/servidor-api.cjs"], { cwd: path.join(__dirname, ".."), env: { ...process.env, API_DB_PATH: db, API_PORT: String(puerto) } });
+  t.after(() => { proceso.kill(); fs.rmSync(directorio, { recursive: true, force: true }); });
+  await new Promise((resolve, reject) => {
+    proceso.stdout.once("data", resolve);
+    proceso.once("error", reject);
+    proceso.once("exit", code => reject(new Error(`La API terminó: ${code}`)));
+  });
+  const base = `http://127.0.0.1:${puerto}/api`;
+  async function peticion(ruta, method = "GET", body, token) {
+    const res = await fetch(base + ruta, { method, headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
+    return { status: res.status, body: await res.json() };
+  }
+  const login = await peticion("/login", "POST", { email: "alumno@ejemplo.test", password: "clave123" });
+  const token = login.body.accessToken;
+  const otro = (await peticion("/register", "POST", { name: "Otro", email: "otro@ejemplo.test", password: "clave123" })).body.accessToken;
+  assert.equal((await peticion("/orders")).status, 401);
+  assert.equal((await peticion("/orders", "POST", {}, "token-falso")).status, 401);
+  assert.equal((await peticion("/cart/items", "POST", { bookId: "b01", quantity: 2 }, token)).status, 200);
+  const items = [{ bookId: "b01", quantity: 2, expectedPriceCents: 1196 }];
+  const payment = { name: "Nombre ficticio privado", number: "4242424242424242", expiry: "12/99", cvv: "987" };
+  const solicitud = { requestId: "compra-1", items, payment };
+  const enviar = body => peticion("/orders", "POST", body, token);
+  let resultado = await enviar({ ...solicitud, payment: { ...payment, number: "4000000000000002" } });
+  assert.equal(resultado.status, 402);
+  assert.equal(resultado.body.error.code, "CARD_DECLINED");
+  resultado = await enviar({ ...solicitud, payment: { ...payment, number: "4000000000009995" } });
+  assert.equal(resultado.body.error.code, "ACCOUNT_NOT_FOUND");
+  assert.equal((await enviar({ ...solicitud, payment: { ...payment, number: "1234567890123456" } })).body.error.code, "INVALID_CARD");
+  assert.equal((await enviar({ ...solicitud, payment: { ...payment, expiry: "01/20" } })).body.error.code, "INVALID_CARD");
+  assert.equal((await enviar({ ...solicitud, payment: { ...payment, cvv: "x" } })).status, 400);
+  assert.equal((await enviar({ ...solicitud, items: [{ ...items[0], expectedPriceCents: 1 }] })).body.error.code, "CART_CHANGED");
+  assert.equal((await enviar({ ...solicitud, items: [{ ...items[0], quantity: 1 }] })).body.error.code, "CART_CHANGED");
+  assert.equal((await peticion("/cart", "GET", undefined, token)).body.items[0].quantity, 2);
+  assert.deepEqual((await peticion("/orders", "GET", undefined, token)).body, []);
+  resultado = await enviar(solicitud);
+  assert.equal(resultado.status, 201);
+  const pedido = resultado.body;
+  assert.equal(pedido.totalCents, 2392);
+  assert.equal(pedido.items[0].unitPriceCents, 1196);
+  assert.equal(pedido.itemCount, 2);
+  assert.equal(pedido.payment, undefined);
+  assert.deepEqual((await peticion("/cart", "GET", undefined, token)).body.items, []);
+  assert.equal((await peticion(`/orders/${pedido.id}`, "GET", undefined, otro)).status, 404);
+  assert.equal((await peticion("/orders/by-request/compra-1", "GET", undefined, otro)).status, 404);
+  assert.equal((await peticion("/orders/by-request/compra-1", "GET", undefined, token)).body.id, pedido.id);
+  assert.equal((await peticion(`/orders/${pedido.id}`, "GET", undefined, token)).body.id, pedido.id);
+  assert.equal((await peticion("/orders", "GET", undefined, token)).body.length, 1);
+  await peticion("/cart/items", "POST", { bookId: "b04", quantity: 1 }, token);
+  const reintento = await enviar(solicitud);
+  assert.equal(reintento.status, 200);
+  assert.equal(reintento.body.id, pedido.id);
+  assert.equal((await peticion("/cart", "GET", undefined, token)).body.items[0].bookId, "b04");
+  assert.equal((await enviar({ ...solicitud, items: [{ ...items[0], quantity: 1 }] })).body.error.code, "REQUEST_CONFLICT");
+  const fichero = fs.readFileSync(db, "utf8");
+  for (const dato of [payment.number, payment.name, payment.cvv, payment.expiry]) assert.equal(fichero.includes(dato), false);
+});

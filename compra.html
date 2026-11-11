@@ -6,6 +6,7 @@
   <title>Compra | Entre páginas</title>
   <link rel="stylesheet" href="css/styles.css">
   <script type="module" src="js/cabecera.js"></script>
+  <script type="module" src="js/compra.js"></script>
 </head>
 <body>
   <header class="site-header"><div class="container header-content">
@@ -20,24 +21,29 @@
   </div></header>
   <main class="container page">
     <a class="back-link" href="carrito.html"><span aria-hidden="true">←</span> Volver al carrito</a>
-    <div class="page-heading"><p class="eyebrow">ÚLTIMO PASO</p><h1>Confirmar compra</h1><p class="page-intro">Esta pantalla muestra cómo sería una compra de ejemplo. No introduce ningún pago real.</p></div>
-    <div class="two-column">
+    <div class="page-heading"><p class="eyebrow">ÚLTIMO PASO</p><h1>Confirmar compra</h1><p class="page-intro">Compra simulada: no se realizan pagos reales.</p></div>
+    <p id="checkout-status" role="status" aria-live="polite">Cargando compra...</p>
+    <button type="button" id="checkout-retry" hidden>Comprobar el resultado</button>
+    <p id="checkout-login" hidden><a href="login.html?next=compra">Inicia sesión o regístrate para continuar</a>.</p>
+    <noscript>Activa JavaScript para confirmar la compra simulada.</noscript>
+    <div class="two-column" id="checkout-content" hidden>
       <section class="panel" aria-labelledby="payment-title">
         <h2 id="payment-title">Pago simulado</h2>
-        <p class="demo-note">No utilices datos de tarjetas reales. Estos campos son una maqueta deshabilitada y no se envían ni se guardan.</p>
-        <form class="checkout-fields">
-          <fieldset class="form-fields" disabled>
-            <div class="field"><label for="card-name">Nombre en la tarjeta ficticia</label><input id="card-name" name="cardName" type="text"></div>
-            <div class="field"><label for="card-number">Número de tarjeta ficticia</label><input id="card-number" name="cardNumber" type="text" inputmode="numeric"></div>
-            <div class="field"><label for="card-expiry">Caducidad ficticia</label><input id="card-expiry" name="cardExpiry" type="text" placeholder="MM/AA"></div>
+        <p class="demo-note"><strong>No utilices tarjetas reales.</strong> Números de prueba: 4242 4242 4242 4242 (aceptada), 4000 0000 0000 0002 (rechazada) y 4000 0000 0000 9995 (cuenta inexistente). Solo se admiten estos números ficticios.</p>
+        <form class="checkout-fields" id="checkout-form" autocomplete="off">
+          <fieldset class="form-fields" id="checkout-fields" disabled>
+            <div class="field"><label for="card-name">Nombre ficticio</label><input id="card-name" type="text" maxlength="100" autocomplete="off" required></div>
+            <div class="field"><label for="card-number">Número ficticio (16 dígitos)</label><input id="card-number" type="text" inputmode="numeric" autocomplete="off" maxlength="23" required></div>
+            <div class="field"><label for="card-expiry">Caducidad ficticia</label><input id="card-expiry" type="text" inputmode="numeric" autocomplete="off" placeholder="MM/AA" maxlength="5" required></div>
+            <div class="field"><label for="card-cvv">Código de seguridad ficticio (3 dígitos)</label><input id="card-cvv" type="text" inputmode="numeric" autocomplete="off" maxlength="3" required></div>
           </fieldset>
-          <button class="button" type="submit" disabled>Confirmar pedido <span aria-hidden="true">→</span></button>
+          <button class="button" id="checkout-submit" type="submit" disabled>Confirmar pedido <span aria-hidden="true">→</span></button>
         </form>
       </section>
       <aside class="panel" aria-labelledby="checkout-summary-title">
         <h2 id="checkout-summary-title">Resumen del pedido</h2>
-        <dl class="summary-list"><div><dt>Los juegos del hambre × 1</dt><dd>11,96 €</dd></div><div><dt>El principito × 1</dt><dd>12,76 €</dd></div><div class="summary-total"><dt>Total</dt><dd>24,72 €</dd></div></dl>
-        <p class="demo-note">Los libros y precios son ficticios. La compra necesitará una cuenta cuando esté disponible.</p>
+        <dl class="summary-list" id="checkout-summary"></dl>
+        <p class="demo-note">El servidor comprueba los precios antes de confirmar. Los datos de tarjeta ficticia no se guardan.</p>
       </aside>
     </div>
   </main>
