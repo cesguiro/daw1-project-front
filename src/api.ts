@@ -13,6 +13,35 @@ export interface RespuestaAcceso {
   accessToken: string;
 }
 
+export interface LineaCarrito {
+  bookId: string;
+  quantity: number;
+  book: Libro | null;
+}
+
+export interface Carrito { items: LineaCarrito[]; }
+
+async function peticionCarrito(token: string, ruta = "", method = "GET", datos?: object): Promise<Carrito> {
+  const respuesta = await fetch(`${API_URL}/cart${ruta}`, {
+    method,
+    headers: { Authorization: `Bearer ${token}`, ...(datos ? { "Content-Type": "application/json" } : {}) },
+    ...(datos ? { body: JSON.stringify(datos) } : {})
+  });
+  if (!respuesta.ok) throw new ErrorApi(respuesta.status);
+  return respuesta.json() as Promise<Carrito>;
+}
+
+export function obtenerCarrito(token: string): Promise<Carrito> { return peticionCarrito(token); }
+export function anadirAlCarrito(token: string, bookId: string, quantity = 1): Promise<Carrito> {
+  return peticionCarrito(token, "/items", "POST", { bookId, quantity });
+}
+export function cambiarCantidad(token: string, bookId: string, quantity: number): Promise<Carrito> {
+  return peticionCarrito(token, `/items/${encodeURIComponent(bookId)}`, "PATCH", { quantity });
+}
+export function eliminarDelCarrito(token: string, bookId: string): Promise<Carrito> {
+  return peticionCarrito(token, `/items/${encodeURIComponent(bookId)}`, "DELETE");
+}
+
 async function autenticar(ruta: string, datos: object): Promise<RespuestaAcceso> {
   const respuesta = await fetch(`${API_URL}${ruta}`, {
     method: "POST",

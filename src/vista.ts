@@ -7,7 +7,7 @@ export function elemento<K extends keyof HTMLElementTagNameMap>(etiqueta: K, cla
   return resultado;
 }
 
-function dinero(centimos: number): string {
+export function dinero(centimos: number): string {
   return new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(centimos / 100);
 }
 

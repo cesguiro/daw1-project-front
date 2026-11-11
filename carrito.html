@@ -6,6 +6,7 @@
   <title>Carrito | Entre páginas</title>
   <link rel="stylesheet" href="css/styles.css">
   <script type="module" src="js/cabecera.js"></script>
+  <script type="module" src="js/carrito.js"></script>
 </head>
 <body>
   <header class="site-header"><div class="container header-content">
@@ -18,26 +19,18 @@
     </nav>
   </div></header>
   <main class="container page">
-    <div class="page-heading"><p class="eyebrow">TUS PRÓXIMAS LECTURAS</p><h1>Tu carrito</h1><p>Dos libros de ejemplo en tu carrito.</p></div>
-    <div class="two-column">
+    <div class="page-heading"><p class="eyebrow">TUS PRÓXIMAS LECTURAS</p><h1>Tu carrito</h1></div>
+    <p id="cart-status" role="status" aria-live="polite">Cargando carrito...</p>
+    <noscript>Activa JavaScript para consultar tu carrito.</noscript>
+    <div class="two-column" id="cart-content" hidden>
       <section class="panel" aria-labelledby="cart-items-title">
         <h2 id="cart-items-title">Libros seleccionados</h2>
-        <div class="items-list">
-          <article class="order-item">
-            <img src="https://images.cesguiro.es/books/9780439023528.webp" alt="Portada de Los juegos del hambre" width="76" height="110">
-            <div class="item-content"><h3>Los juegos del hambre</h3><p>Suzanne Collins</p><p class="item-price">11,96 € <span class="visually-hidden">Precio anterior: </span><del class="original-price">14,95 €</del></p><div class="item-controls"><label for="quantity-hunger">Cantidad</label><input id="quantity-hunger" type="number" value="1" min="1" disabled><button type="button" disabled>Eliminar</button></div></div>
-          </article>
-          <article class="order-item">
-            <img src="https://images.cesguiro.es/books/9780142424179.webp" alt="Portada de El principito" width="76" height="110">
-            <div class="item-content"><h3>El principito</h3><p>Antoine de Saint-Exupéry</p><p class="item-price">12,76 € <span class="visually-hidden">Precio anterior: </span><del class="original-price">15,95 €</del></p><div class="item-controls"><label for="quantity-prince">Cantidad</label><input id="quantity-prince" type="number" value="1" min="1" disabled><button type="button" disabled>Eliminar</button></div></div>
-          </article>
-        </div>
+        <div class="items-list" id="cart-items"></div>
       </section>
       <aside class="panel" aria-labelledby="cart-summary-title">
         <h2 id="cart-summary-title">Resumen</h2>
-        <dl class="summary-list"><div><dt>Libros</dt><dd>2</dd></div><div class="summary-total"><dt>Total</dt><dd>24,72 €</dd></div></dl>
-        <a class="button button-link" href="compra.html">Ver compra de ejemplo <span aria-hidden="true">→</span></a>
-        <p class="demo-note">Puedes visitar la siguiente pantalla, pero no realizar una compra. El carrito y los precios son ficticios.</p>
+        <dl class="summary-list"><div><dt>Libros</dt><dd id="cart-count">0</dd></div><div class="summary-total"><dt>Total orientativo</dt><dd id="cart-total">0 €</dd></div></dl>
+        <p class="demo-note">La compra y los pedidos todavía no están disponibles. Los precios son ficticios y pueden cambiar.</p>
       </aside>
     </div>
   </main>

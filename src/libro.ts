@@ -1,5 +1,6 @@
-import { ErrorApi, obtenerLibro, obtenerResenas } from "./api.js";
+import { anadirAlCarrito, ErrorApi, obtenerLibro, obtenerResenas } from "./api.js";
 import { crearPrecio, crearPuntuacion, crearResena } from "./vista.js";
+import { obtenerToken } from "./sesion.js";
 
 function porId<T extends HTMLElement>(id: string): T {
   const resultado = document.getElementById(id);
@@ -30,6 +31,29 @@ async function cargarDetalle(): Promise<void> {
     porId("reviews-rating").replaceChildren(crearPuntuacion(libro.averageRating, libro.reviewCount));
     porId("book-detail").hidden = false;
     porId("resenas").hidden = false;
+    const boton = porId<HTMLButtonElement>("add-to-cart");
+    boton.disabled = false;
+    boton.addEventListener("click", async () => {
+      const mensaje = porId("cart-message");
+      const token = obtenerToken();
+      if (!token) {
+        mensaje.replaceChildren(document.createTextNode("Para añadir libros, "));
+        const enlace = document.createElement("a");
+        enlace.href = "login.html";
+        enlace.textContent = "inicia sesión";
+        mensaje.append(enlace, document.createTextNode("."));
+        return;
+      }
+      boton.disabled = true;
+      try {
+        await anadirAlCarrito(token, libro.id);
+        mensaje.textContent = "Libro añadido al carrito.";
+      } catch (error) {
+        mensaje.textContent = error instanceof ErrorApi && error.status === 401
+          ? "La sesión ha caducado. Inicia sesión de nuevo."
+          : "No se ha podido añadir el libro. Comprueba la conexión o la cantidad máxima (99).";
+      } finally { boton.disabled = false; }
+    });
     estado.hidden = true;
     await cargarResenas(id);
   } catch (error) {

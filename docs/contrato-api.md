@@ -1,6 +1,6 @@
 # Contrato inicial de la API
 
-Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo, el detalle, la consulta de reseñas, el login y el registro; las demás rutas se incorporarán en sus fases correspondientes.
+Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo, el detalle, la consulta de reseñas, el login, el registro y el carrito de usuarios identificados; las demás rutas se incorporarán en sus fases correspondientes.
 
 ## Convenciones
 
@@ -8,7 +8,7 @@ Propuesta para coordinar el front y el back de la librería. La simulación impl
 - Los identificadores de libros y pedidos son cadenas. En la simulación actual, los identificadores de usuarios son numéricos. Las fechas incluyen zona horaria y usan ISO 8601, por ejemplo `2025-03-20T10:00:00Z`.
 - Los importes son números enteros en **céntimos de euro**: `1196` equivale a 11,96 €. Los descuentos son porcentajes enteros de 0 a 100.
 - Las rutas protegidas requieren `Authorization: Bearer <token>`. El servidor determina el usuario a partir del token; no acepta un identificador de usuario enviado por el cliente para seleccionar sus pedidos.
-- El cliente guarda el carrito localmente. La API solo recibe sus líneas al confirmar un pedido.
+- El carrito de un usuario identificado se guarda en el servidor, asociado al usuario del token. Los invitados necesitarán iniciar sesión hasta la siguiente fase.
 
 ## Usuarios y sesión
 
@@ -124,6 +124,16 @@ El ejemplo abrevia `content`; una respuesta real incluirá hasta cinco reseñas.
 
 `POST /api/books/{bookId}/reviews` permite a un usuario identificado enviar `{ "rating": 5, "comment": "Me gustó mucho" }`. La respuesta `201` devuelve la reseña con la estructura anterior. La puntuación es un entero de 1 a 5 y cada usuario puede publicar una reseña por libro. El formulario de la maqueta está deshabilitado.
 
+## Carrito
+
+Todas las rutas requieren `Authorization: Bearer <token>` y operan exclusivamente sobre el carrito del usuario autenticado. `GET /api/cart` devuelve `{ "items": [{ "bookId": "b01", "quantity": 1, "book": { ... } }] }`. `book` contiene los datos actuales del catálogo, o `null` si el libro ya no existe; esa línea se puede eliminar. Un carrito vacío devuelve `{ "items": [] }`.
+
+- `POST /api/cart/items` recibe `{ "bookId": "b01", "quantity": 1 }` y suma la cantidad si ya existe la línea.
+- `PATCH /api/cart/items/{bookId}` recibe `{ "quantity": 2 }` y sustituye la cantidad.
+- `DELETE /api/cart/items/{bookId}` elimina la línea.
+
+Las operaciones devuelven el carrito actualizado. Las cantidades son enteros de 1 a 99; superar el límite devuelve `400` sin modificarlo. Un libro o línea inexistente devuelve `404`. Los precios mostrados son orientativos; la compra debe calcularlos en el servidor. La API simulada guarda carritos en `data/db.local.json`, solo para desarrollo local.
+
 ## Pedidos
 
 Todas estas rutas requieren login. Solo se pueden consultar los pedidos del usuario autenticado.
@@ -209,4 +219,4 @@ Estos errores son la propuesta para el back real. `json-server-auth` devuelve er
 
 JSON Server puede servir como punto de partida para los datos, pero **no implementa por sí solo este contrato completo**: hacen falta lógica adicional para el login con tokens, las restricciones por usuario, los cálculos de pedidos, la media de reseñas y las respuestas propuestas. Podría usarse un pequeño servidor simulado en su lugar. Ninguna de estas medidas convierte la simulación en un sistema listo para producción.
 
-La simulación actual adapta la paginación de JSON Server al contrato de `/api/books` y utiliza `json-server-auth` para el login. Es únicamente para desarrollo local: el complemento utiliza una clave JWT fija y conocida, por lo que no es seguro exponerlo. Los precios finales, medias y recuentos se mantienen en los datos de ejemplo; no se calculan automáticamente.
+La simulación actual adapta la paginación de JSON Server al contrato de `/api/books`, implementa el carrito y utiliza `json-server-auth` para el login. Es únicamente para desarrollo local: el complemento utiliza una clave JWT fija y conocida, por lo que no es seguro exponerlo. Los precios finales, medias y recuentos se mantienen en los datos de ejemplo; no se calculan automáticamente.
