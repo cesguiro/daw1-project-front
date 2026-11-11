@@ -45,7 +45,9 @@
         <p class="section-note">Una pequeña selección de grandes historias.</p>
       </div>
 
-      <div class="book-grid">
+      <p id="catalog-status" class="loading-message" role="status">Cargando libros...</p>
+      <noscript>Activa JavaScript para consultar el catálogo.</noscript>
+      <div class="book-grid" id="book-grid" hidden>
         <article class="book-card">
           <a class="cover-link" href="libro.html" aria-label="Ver detalle de Los juegos del hambre">
             <div class="book-cover"><img src="https://images.cesguiro.es/books/9780439023528.webp" alt="Portada de Los juegos del hambre" width="240" height="360"></div>
@@ -115,6 +117,11 @@
           </div>
         </article>
       </div>
+      <nav class="pagination" id="pagination" aria-label="Páginas del catálogo" hidden>
+        <button type="button" id="previous-page">Anterior</button>
+        <span id="page-info" aria-live="polite"></span>
+        <button type="button" id="next-page">Siguiente</button>
+      </nav>
       <p class="demo-note">Catálogo de ejemplo. Los precios y las valoraciones son ficticios y, por ahora, solo está disponible el detalle de Los juegos del hambre.</p>
     </section>
   </main>

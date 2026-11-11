@@ -1,10 +1,10 @@
 # Contrato inicial de la API
 
-Propuesta para coordinar el front y el back de la librería. La maqueta es estática; este contrato todavía no está implementado y puede ajustarse antes de desarrollar la API.
+Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo; las demás rutas se incorporarán en sus fases correspondientes.
 
 ## Convenciones
 
-- Las rutas siguientes son relativas a la URL base de la API. Se intercambia JSON con `Content-Type: application/json`.
+- Las rutas siguientes incluyen el prefijo `/api` y son relativas al origen del servidor. Se intercambia JSON con `Content-Type: application/json`.
 - Los identificadores son cadenas. Las fechas incluyen zona horaria y usan ISO 8601, por ejemplo `2025-03-20T10:00:00Z`.
 - Los importes son números enteros en **céntimos de euro**: `1196` equivale a 11,96 €. Los descuentos son porcentajes enteros de 0 a 100.
 - Las rutas protegidas requieren `Authorization: Bearer <token>`. El servidor determina el usuario a partir del token; no acepta un identificador de usuario enviado por el cliente para seleccionar sus pedidos.
@@ -14,7 +14,7 @@ Propuesta para coordinar el front y el back de la librería. La maqueta es está
 
 ### Registro
 
-`POST /auth/register`
+`POST /api/register`
 
 Petición:
 
@@ -25,14 +25,14 @@ Petición:
 Respuesta `201 Created`:
 
 ```json
-{ "id": "u1", "name": "Ana", "email": "ana@example.com" }
+{ "accessToken": "token-de-ejemplo", "user": { "id": 1, "name": "Ana", "email": "ana@example.com" } }
 ```
 
 La confirmación de contraseña se comprueba en el front y no se envía. El registro no inicia sesión automáticamente: después se utiliza el login.
 
 ### Login
 
-`POST /auth/login`
+`POST /api/login`
 
 Petición:
 
@@ -43,21 +43,24 @@ Petición:
 Respuesta `200 OK`:
 
 ```json
-{ "token": "token-opaco-de-ejemplo", "user": { "id": "u1", "name": "Ana", "email": "ana@example.com" } }
+{ "accessToken": "token-de-ejemplo", "user": { "id": 1, "name": "Ana", "email": "ana@example.com" } }
 ```
 
-El token es una cadena opaca, no un JWT. El servidor debe generarlo de forma segura, comprobarlo en cada petición protegida y definir su caducidad. Nunca se devuelven contraseñas; el back real debe almacenarlas mediante un hash seguro, no en texto plano.
+El front trata el token como una cadena sin interpretar su contenido. El servidor debe generarlo de forma segura, comprobarlo en cada petición protegida y definir su caducidad. Nunca se devuelven contraseñas; el back real debe almacenarlas mediante un hash seguro, no en texto plano.
 
 ## Libros
 
 ### Catálogo
 
-`GET /books` devuelve un array de libros. El precio final se proporciona para que el front no tenga que duplicar la regla de descuento.
+`GET /api/books?page=1&size=6` devuelve una página de libros. `page` empieza en 1 y `size` debe estar entre 1 y 100. Por defecto son 1 y 6. El orden es por identificador ascendente. Los parámetros no válidos devuelven `400`; una página fuera de rango tiene `content` vacío. Si no hay libros, `totalPages` es 0. En Spring se puede convertir a índice cero con `PageRequest.of(page - 1, size)`.
+
+El precio final se proporciona para que el front no tenga que duplicar la regla de descuento. Ejemplo abreviado de `content`:
 
 ```json
-[
+{
+  "content": [
   {
-    "id": "b1",
+    "id": "b01",
     "title": "Los juegos del hambre",
     "author": "Suzanne Collins",
     "category": "Ciencia ficción",
@@ -66,20 +69,26 @@ El token es una cadena opaca, no un JWT. El servidor debe generarlo de forma seg
     "discountPercent": 20,
     "finalPriceCents": 1196,
     "averageRating": 4.3,
-    "reviewCount": 6
+    "reviewCount": 6,
+    "description": "Katniss participa en los Juegos del Hambre."
   }
-]
+  ],
+  "page": 1,
+  "size": 6,
+  "totalElements": 24,
+  "totalPages": 4
+}
 ```
 
 Para un libro sin descuento, `discountPercent` es `0` y ambos precios son iguales. Para uno sin reseñas, `averageRating` es `null` y `reviewCount` es `0`. La media se calcula sobre todas las reseñas, redondeada a una cifra decimal.
 
 ### Detalle
 
-`GET /books/{bookId}` devuelve los mismos campos que un libro del catálogo y, además, `description`:
+`GET /api/books/{bookId}` devuelve los datos del libro, incluida `description`:
 
 ```json
 {
-  "id": "b1",
+  "id": "b01",
   "title": "Los juegos del hambre",
   "author": "Suzanne Collins",
   "category": "Ciencia ficción",
@@ -95,22 +104,23 @@ Para un libro sin descuento, `discountPercent` es `0` y ambos precios son iguale
 
 ## Reseñas
 
-`GET /books/{bookId}/reviews?page=1&limit=5` devuelve primero las más recientes. `page` empieza en 1 y `limit` es 5 por defecto. El total corresponde a todas las reseñas del libro, no solo a las de esa página.
+`GET /api/books/{bookId}/reviews?page=1&size=5` devuelve primero las más recientes. `page` empieza en 1 y `size` es 5 por defecto. El total corresponde a todas las reseñas del libro, no solo a las de esa página.
 
 ```json
 {
-  "items": [
+  "content": [
     { "id": "r1", "userName": "Lucía M.", "rating": 5, "comment": "Una historia emocionante.", "createdAt": "2025-03-15T10:00:00Z" }
   ],
   "page": 1,
-  "limit": 5,
-  "total": 6
+  "size": 5,
+  "totalElements": 6,
+  "totalPages": 2
 }
 ```
 
-El ejemplo abrevia `items`; una respuesta real incluirá hasta cinco reseñas. Si no existen, `items` es un array vacío y `total` es `0`.
+El ejemplo abrevia `content`; una respuesta real incluirá hasta cinco reseñas. Si no existen, `content` es un array vacío y `totalElements` es `0`.
 
-`POST /books/{bookId}/reviews` permite a un usuario identificado enviar `{ "rating": 5, "comment": "Me gustó mucho" }`. La respuesta `201` devuelve la reseña con la estructura anterior. La puntuación es un entero de 1 a 5 y cada usuario puede publicar una reseña por libro. El formulario de la maqueta está deshabilitado.
+`POST /api/books/{bookId}/reviews` permite a un usuario identificado enviar `{ "rating": 5, "comment": "Me gustó mucho" }`. La respuesta `201` devuelve la reseña con la estructura anterior. La puntuación es un entero de 1 a 5 y cada usuario puede publicar una reseña por libro. El formulario de la maqueta está deshabilitado.
 
 ## Pedidos
 
@@ -118,21 +128,21 @@ Todas estas rutas requieren login. Solo se pueden consultar los pedidos del usua
 
 ### Crear pedido
 
-`POST /orders`
+`POST /api/orders`
 
 Petición:
 
 ```json
-{ "items": [ { "bookId": "b1", "quantity": 1 }, { "bookId": "b2", "quantity": 1 } ] }
+{ "items": [ { "bookId": "b01", "quantity": 1 }, { "bookId": "b04", "quantity": 1 } ] }
 ```
 
 Las cantidades son enteros positivos. El servidor obtiene los precios actuales, aplica los descuentos, calcula el total y asocia el pedido al usuario. No confía en precios ni totales enviados por el cliente. No hay gastos de envío ni gestión de stock en esta versión.
 
-Respuesta `201 Created`: devuelve el detalle completo del pedido con la estructura de `GET /orders/{orderId}`. La operación es una simulación: no se procesan pagos reales. Los campos de tarjeta de la maqueta no forman parte de esta petición y no se envían ni guardan.
+Respuesta `201 Created`: devuelve el detalle completo del pedido con la estructura de `GET /api/orders/{orderId}`. La operación es una simulación: no se procesan pagos reales. Los campos de tarjeta de la maqueta no forman parte de esta petición y no se envían ni guardan.
 
 ### Listado de mis pedidos
 
-`GET /orders` devuelve un array, del más reciente al más antiguo:
+`GET /api/orders` devuelve un array, del más reciente al más antiguo:
 
 ```json
 [
@@ -144,7 +154,7 @@ Respuesta `201 Created`: devuelve el detalle completo del pedido con la estructu
 
 ### Detalle de un pedido
 
-`GET /orders/{orderId}`:
+`GET /api/orders/{orderId}`:
 
 ```json
 {
@@ -153,7 +163,7 @@ Respuesta `201 Created`: devuelve el detalle completo del pedido con la estructu
   "itemCount": 2,
   "items": [
     {
-      "bookId": "b1",
+      "bookId": "b01",
       "title": "Los juegos del hambre",
       "author": "Suzanne Collins",
       "coverUrl": "https://images.cesguiro.es/books/9780439023528.webp",
@@ -162,7 +172,7 @@ Respuesta `201 Created`: devuelve el detalle completo del pedido con la estructu
       "subtotalCents": 1196
     },
     {
-      "bookId": "b2",
+      "bookId": "b04",
       "title": "El principito",
       "author": "Antoine de Saint-Exupéry",
       "coverUrl": "https://images.cesguiro.es/books/9780142424179.webp",
@@ -194,3 +204,5 @@ Las respuestas de error usan esta estructura:
 ## API simulada
 
 JSON Server puede servir como punto de partida para los datos, pero **no implementa por sí solo este contrato completo**: hacen falta lógica adicional para el login con tokens, las restricciones por usuario, los cálculos de pedidos, la media de reseñas y las respuestas propuestas. Podría usarse un pequeño servidor simulado en su lugar. Ninguna de estas medidas convierte la simulación en un sistema listo para producción.
+
+La simulación actual adapta la paginación de JSON Server al contrato de `/api/books`. Los precios finales, medias y recuentos se mantienen en los datos de ejemplo; no se calculan automáticamente.

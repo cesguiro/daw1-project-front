@@ -9,6 +9,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
 body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--sans); }
 a { color: inherit; }
@@ -65,6 +66,10 @@ h1, h2, h3 { font-family: var(--serif); }
 .book-detail-link { display: inline-block; margin-top: 12px; color: #98503d; font-size: 0.8rem; font-weight: bold; text-decoration: none; }
 .demo-note { color: var(--muted); font-size: 0.78rem; line-height: 1.6; }
 .catalog-section > .demo-note { margin: 42px 0 0; }
+.loading-message { color: var(--muted); line-height: 1.6; }
+.pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px; margin-top: 40px; font-size: 0.85rem; }
+.pagination button { padding: 10px 14px; border: 1px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; }
+.pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .detail-page { min-height: 70vh; padding-block: 42px 90px; }
 .back-link { display: inline-flex; gap: 10px; align-items: center; margin-bottom: 40px; color: var(--muted); font-size: 0.85rem; text-decoration: none; }
