@@ -5,26 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Iniciar sesión | Entre páginas</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/cabecera.js"></script>
+  <script type="module" src="js/login.js"></script>
 </head>
 <body>
   <header class="site-header"><div class="container header-content">
     <a class="brand" href="index.html" aria-label="Entre páginas, inicio"><span class="brand-mark" aria-hidden="true">ep</span><span>entre páginas</span></a>
     <nav class="site-nav" aria-label="Navegación principal">
-      <a class="nav-link" href="index.html">Catálogo</a><a class="nav-link" href="carrito.html">Carrito</a><a class="nav-link" href="pedidos.html">Mis pedidos</a><a class="nav-link" href="login.html" aria-current="page">Iniciar sesión</a><a class="nav-link" href="registro.html">Registro</a>
+      <a class="nav-link" href="index.html">Catálogo</a>
+      <a class="nav-link" href="login.html" aria-current="page" data-sesion-invitado hidden>Iniciar sesión</a>
+      <details class="account-menu" data-sesion-activa hidden><summary class="nav-link">Mi cuenta</summary><div class="account-links"><a href="pedidos.html">Mis pedidos</a><a href="carrito.html">Carrito</a><button type="button" data-cerrar-sesion>Cerrar sesión</button></div></details>
+      <noscript><a class="nav-link" href="login.html">Iniciar sesión</a></noscript>
     </nav>
   </div></header>
   <main class="container page auth-page">
     <div class="page-heading"><p class="eyebrow">TE DAMOS LA BIENVENIDA</p><h1>Iniciar sesión</h1><p>Accede a tu cuenta para consultar tus pedidos y continuar con tu compra.</p></div>
     <div class="panel">
-      <form>
-        <fieldset class="form-fields" disabled>
+      <form id="login-form">
+        <fieldset class="form-fields" id="login-fields" disabled>
           <div class="field"><label for="email">Correo electrónico</label><input id="email" name="email" type="email" autocomplete="email" required></div>
           <div class="field"><label for="password">Contraseña</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
         </fieldset>
-        <button class="button" type="submit" disabled>Iniciar sesión <span aria-hidden="true">→</span></button>
+        <p id="login-message" class="form-message" role="status" aria-live="polite"></p>
+        <button class="button" id="login-submit" type="submit" disabled>Iniciar sesión <span aria-hidden="true">→</span></button>
       </form>
       <p class="form-note">¿No tienes cuenta? <a href="registro.html">Regístrate</a>.</p>
-      <p class="demo-note">Formulario de ejemplo: el inicio de sesión todavía no está disponible.</p>
+      <p class="demo-note">Acceso de prueba en local. Utiliza únicamente datos ficticios.</p>
+      <noscript>Activa JavaScript para iniciar sesión.</noscript>
     </div>
   </main>
   <footer class="site-footer"><div class="container footer-content"><p class="footer-brand">entre páginas</p><p>Una librería de ejemplo para aprender creando.</p></div></footer>

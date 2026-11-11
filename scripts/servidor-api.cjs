@@ -1,10 +1,41 @@
 const path = require("node:path");
+const fs = require("node:fs");
 const cors = require("cors");
 const jsonServer = require("json-server");
+const auth = require("json-server-auth");
 
 const servidor = jsonServer.create();
-const router = jsonServer.router(path.join(__dirname, "..", "data", "db.json"));
+const datosIniciales = path.join(__dirname, "..", "data", "db.json");
+const datosLocales = path.join(__dirname, "..", "data", "db.local.json");
+if (!fs.existsSync(datosLocales)) fs.copyFileSync(datosIniciales, datosLocales, fs.constants.COPYFILE_EXCL);
+const router = jsonServer.router(datosLocales);
+servidor.db = router.db;
 servidor.use(cors({ origin: ["http://localhost:8080", "http://127.0.0.1:8080"] }));
+servidor.use(jsonServer.bodyParser);
+
+// Limitamos las rutas expuestas: no se pueden consultar /db ni /users.
+servidor.use((req, res, next) => {
+  const lectura = req.method === "GET" || req.method === "HEAD";
+  const libros = /^\/api\/books(?:\/[^/]+(?:\/reviews)?)?\/?$/.test(req.path);
+  const sesion = req.path === "/api/session";
+  const login = req.path === "/api/login";
+  if ((lectura && (libros || sesion)) || (req.method === "POST" && login)) {
+    if (login) {
+      const { email, password } = req.body || {};
+      if (typeof email !== "string" || typeof password !== "string") {
+        return res.status(400).json({ error: "Datos de autenticación inválidos" });
+      }
+      req.body = { email, password };
+    }
+    return next();
+  }
+  return res.status(404).json({ error: "Ruta no disponible en la simulación" });
+});
+
+// La sesión se comprueba sin que el front tenga que leer el contenido del token.
+servidor.use(auth.rewriter({ "/api/login": "/login", "/api/session": "/660/session" }));
+servidor.use(auth);
+servidor.get("/session", (_req, res) => res.json({ active: true }));
 
 // Adaptamos la paginación de JSON Server al contrato que seguirá Spring.
 function paginar(req, res, elementos, tamanoPorDefecto) {

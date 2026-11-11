@@ -1,4 +1,7 @@
 {
+  "users": [
+    { "id": 1, "name": "Alumno de prueba", "email": "alumno@ejemplo.test", "password": "$2a$10$pzeSrW5TRJpamGIOXZcAtOCh24EuNw/wGttIL/oM9.LdFI7jg9e/C" }
+  ],
   "books": [
     { "id": "b01", "title": "Los juegos del hambre", "author": "Suzanne Collins", "category": "Ciencia ficción", "coverUrl": "https://images.cesguiro.es/books/9780439023528.webp", "priceCents": 1495, "discountPercent": 20, "finalPriceCents": 1196, "averageRating": 4.3, "reviewCount": 6, "description": "Katniss Everdeen participa en los Juegos del Hambre, una competición donde la supervivencia está en juego." },
     { "id": "b02", "title": "La comunidad del anillo", "author": "J. R. R. Tolkien", "category": "Fantasía", "coverUrl": "https://images.cesguiro.es/books/9780261103573.webp", "priceCents": 1650, "discountPercent": 0, "finalPriceCents": 1650, "averageRating": 5, "reviewCount": 2, "description": "Frodo emprende un viaje por la Tierra Media para impedir que el Anillo Único caiga en manos de Sauron." },

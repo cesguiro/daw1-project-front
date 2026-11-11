@@ -10,6 +10,10 @@
   "devDependencies": {
     "typescript": "5.9.3",
     "json-server": "0.17.4",
+    "json-server-auth": "2.1.0",
     "cors": "2.8.5"
+  },
+  "overrides": {
+    "jsonwebtoken": "9.0.3"
   }
 }

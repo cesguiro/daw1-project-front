@@ -5,12 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pedido #1001 | Entre páginas</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/cabecera.js"></script>
 </head>
 <body>
   <header class="site-header"><div class="container header-content">
     <a class="brand" href="index.html" aria-label="Entre páginas, inicio"><span class="brand-mark" aria-hidden="true">ep</span><span>entre páginas</span></a>
     <nav class="site-nav" aria-label="Navegación principal">
-      <a class="nav-link" href="index.html">Catálogo</a><a class="nav-link" href="carrito.html">Carrito</a><a class="nav-link" href="pedidos.html" aria-current="page">Mis pedidos</a><a class="nav-link" href="login.html">Iniciar sesión</a><a class="nav-link" href="registro.html">Registro</a>
+      <a class="nav-link" href="index.html">Catálogo</a>
+      <a class="nav-link" href="login.html" data-sesion-invitado hidden>Iniciar sesión</a>
+      <details class="account-menu" data-sesion-activa hidden><summary class="nav-link">Mi cuenta</summary><div class="account-links"><a href="pedidos.html" aria-current="page">Mis pedidos</a><a href="carrito.html">Carrito</a><button type="button" data-cerrar-sesion>Cerrar sesión</button></div></details>
+      <noscript><a class="nav-link" href="login.html">Iniciar sesión</a></noscript>
     </nav>
   </div></header>
   <main class="container page">

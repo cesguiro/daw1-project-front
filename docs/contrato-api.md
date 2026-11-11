@@ -1,11 +1,11 @@
 # Contrato inicial de la API
 
-Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo, el detalle y la consulta de reseñas; las demás rutas se incorporarán en sus fases correspondientes.
+Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo, el detalle, la consulta de reseñas y el inicio de sesión; las demás rutas se incorporarán en sus fases correspondientes.
 
 ## Convenciones
 
 - Las rutas siguientes incluyen el prefijo `/api` y son relativas al origen del servidor. Se intercambia JSON con `Content-Type: application/json`.
-- Los identificadores son cadenas. Las fechas incluyen zona horaria y usan ISO 8601, por ejemplo `2025-03-20T10:00:00Z`.
+- Los identificadores de libros y pedidos son cadenas. En la simulación actual, los identificadores de usuarios son numéricos. Las fechas incluyen zona horaria y usan ISO 8601, por ejemplo `2025-03-20T10:00:00Z`.
 - Los importes son números enteros en **céntimos de euro**: `1196` equivale a 11,96 €. Los descuentos son porcentajes enteros de 0 a 100.
 - Las rutas protegidas requieren `Authorization: Bearer <token>`. El servidor determina el usuario a partir del token; no acepta un identificador de usuario enviado por el cliente para seleccionar sus pedidos.
 - El cliente guarda el carrito localmente. La API solo recibe sus líneas al confirmar un pedido.
@@ -47,6 +47,8 @@ Respuesta `200 OK`:
 ```
 
 El front trata el token como una cadena sin interpretar su contenido. El servidor debe generarlo de forma segura, comprobarlo en cada petición protegida y definir su caducidad. Nunca se devuelven contraseñas; el back real debe almacenarlas mediante un hash seguro, no en texto plano.
+
+En la simulación, `GET /api/session` permite comprobar el token mediante `Authorization: Bearer <accessToken>`. Devuelve `{ "active": true }` o `401` si falta o ha caducado. El token simulado dura una hora; cerrar sesión lo elimina del navegador, pero no lo invalida en el servidor.
 
 ## Libros
 
@@ -201,8 +203,10 @@ Las respuestas de error usan esta estructura:
 - `409`: correo ya registrado o reseña duplicada.
 - `500`: error inesperado del servidor.
 
+Estos errores son la propuesta para el back real. `json-server-auth` devuelve errores como cadenas JSON y utiliza `400` para credenciales incorrectas.
+
 ## API simulada
 
 JSON Server puede servir como punto de partida para los datos, pero **no implementa por sí solo este contrato completo**: hacen falta lógica adicional para el login con tokens, las restricciones por usuario, los cálculos de pedidos, la media de reseñas y las respuestas propuestas. Podría usarse un pequeño servidor simulado en su lugar. Ninguna de estas medidas convierte la simulación en un sistema listo para producción.
 
-La simulación actual adapta la paginación de JSON Server al contrato de `/api/books`. Los precios finales, medias y recuentos se mantienen en los datos de ejemplo; no se calculan automáticamente.
+La simulación actual adapta la paginación de JSON Server al contrato de `/api/books` y utiliza `json-server-auth` para el login. Es únicamente para desarrollo local: el complemento utiliza una clave JWT fija y conocida, por lo que no es seguro exponerlo. Los precios finales, medias y recuentos se mantienen en los datos de ejemplo; no se calculan automáticamente.
