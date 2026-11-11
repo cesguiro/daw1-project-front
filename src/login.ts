@@ -6,6 +6,10 @@ const mensaje = document.querySelector<HTMLParagraphElement>("#login-message")!;
 const boton = document.querySelector<HTMLButtonElement>("#login-submit")!;
 const campos = document.querySelector<HTMLFieldSetElement>("#login-fields")!;
 
+if (new URLSearchParams(window.location.search).get("registro") === "ok") {
+  mensaje.textContent = "Cuenta creada. Ya puedes iniciar sesión.";
+}
+
 formulario.addEventListener("submit", async (evento) => {
   evento.preventDefault();
   mensaje.textContent = "";

@@ -1,6 +1,6 @@
 # Contrato inicial de la API
 
-Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo, el detalle, la consulta de reseñas y el inicio de sesión; las demás rutas se incorporarán en sus fases correspondientes.
+Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo, el detalle, la consulta de reseñas, el login y el registro; las demás rutas se incorporarán en sus fases correspondientes.
 
 ## Convenciones
 
@@ -28,7 +28,7 @@ Respuesta `201 Created`:
 { "accessToken": "token-de-ejemplo", "user": { "id": 1, "name": "Ana", "email": "ana@example.com" } }
 ```
 
-La confirmación de contraseña se comprueba en el front y no se envía. El registro no inicia sesión automáticamente: después se utiliza el login.
+La confirmación de contraseña se comprueba en el front y no se envía. Aunque la simulación devuelve un token al registrar, el front no lo guarda: después se utiliza el login.
 
 ### Login
 
@@ -203,7 +203,7 @@ Las respuestas de error usan esta estructura:
 - `409`: correo ya registrado o reseña duplicada.
 - `500`: error inesperado del servidor.
 
-Estos errores son la propuesta para el back real. `json-server-auth` devuelve errores como cadenas JSON y utiliza `400` para credenciales incorrectas.
+Estos errores son la propuesta para el back real. `json-server-auth` devuelve errores como cadenas JSON y utiliza `400` tanto para credenciales incorrectas como para correos ya registrados.
 
 ## API simulada
 

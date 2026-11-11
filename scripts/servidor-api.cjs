@@ -18,14 +18,15 @@ servidor.use((req, res, next) => {
   const lectura = req.method === "GET" || req.method === "HEAD";
   const libros = /^\/api\/books(?:\/[^/]+(?:\/reviews)?)?\/?$/.test(req.path);
   const sesion = req.path === "/api/session";
-  const login = req.path === "/api/login";
-  if ((lectura && (libros || sesion)) || (req.method === "POST" && login)) {
-    if (login) {
-      const { email, password } = req.body || {};
-      if (typeof email !== "string" || typeof password !== "string") {
+  const autenticacion = req.path === "/api/login" || req.path === "/api/register";
+  if ((lectura && (libros || sesion)) || (req.method === "POST" && autenticacion)) {
+    if (autenticacion) {
+      const { name, email, password } = req.body || {};
+      if (typeof email !== "string" || typeof password !== "string" ||
+          (req.path === "/api/register" && (typeof name !== "string" || !name.trim()))) {
         return res.status(400).json({ error: "Datos de autenticación inválidos" });
       }
-      req.body = { email, password };
+      req.body = req.path === "/api/register" ? { name: name.trim(), email, password } : { email, password };
     }
     return next();
   }
@@ -33,7 +34,7 @@ servidor.use((req, res, next) => {
 });
 
 // La sesión se comprueba sin que el front tenga que leer el contenido del token.
-servidor.use(auth.rewriter({ "/api/login": "/login", "/api/session": "/660/session" }));
+servidor.use(auth.rewriter({ "/api/login": "/login", "/api/register": "/register", "/api/session": "/660/session" }));
 servidor.use(auth);
 servidor.get("/session", (_req, res) => res.json({ active: true }));
 

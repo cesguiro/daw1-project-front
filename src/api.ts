@@ -13,16 +13,24 @@ export interface RespuestaAcceso {
   accessToken: string;
 }
 
-export async function iniciarSesion(email: string, password: string): Promise<RespuestaAcceso> {
-  const respuesta = await fetch(`${API_URL}/login`, {
+async function autenticar(ruta: string, datos: object): Promise<RespuestaAcceso> {
+  const respuesta = await fetch(`${API_URL}${ruta}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify(datos)
   });
   if (!respuesta.ok) throw new ErrorApi(respuesta.status);
   const resultado = await respuesta.json() as RespuestaAcceso;
   if (typeof resultado.accessToken !== "string" || !resultado.accessToken) throw new Error("La API no ha devuelto un token válido");
   return resultado;
+}
+
+export function iniciarSesion(email: string, password: string): Promise<RespuestaAcceso> {
+  return autenticar("/login", { email, password });
+}
+
+export function registrarUsuario(name: string, email: string, password: string): Promise<RespuestaAcceso> {
+  return autenticar("/register", { name, email, password });
 }
 
 export async function comprobarSesion(token: string): Promise<boolean> {
