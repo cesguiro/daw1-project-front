@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Detalle de Los juegos del hambre, de Suzanne Collins.">
-  <title>Los juegos del hambre | Entre páginas</title>
+  <meta name="description" content="Detalle de un libro de Entre páginas.">
+  <title>Detalle del libro | Entre páginas</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/libro.js"></script>
 </head>
 <body>
   <header class="site-header">
@@ -26,30 +27,31 @@
 
   <main class="container detail-page">
     <a class="back-link" href="index.html#catalogo"><span aria-hidden="true">←</span> Volver al catálogo</a>
-    <article class="book-detail">
+    <p id="book-status" class="loading-message" role="status">Cargando libro...</p>
+    <noscript>Activa JavaScript para consultar el detalle del libro.</noscript>
+    <article class="book-detail" id="book-detail" hidden>
       <div class="detail-cover">
-        <img src="https://images.cesguiro.es/books/9780439023528.webp" alt="Portada de Los juegos del hambre" width="300" height="450">
+        <img id="book-cover" alt="" width="300" height="450">
       </div>
       <div class="detail-content">
-        <p class="eyebrow">CIENCIA FICCIÓN · NOVELA JUVENIL</p>
-        <h1>Los juegos del hambre</h1>
-        <p class="detail-author">de Suzanne Collins</p>
-        <p class="rating detail-rating"><span class="stars" aria-hidden="true">★★★★☆</span> <span>4,3 de 5 · <a href="#resenas">6 reseñas</a></span></p>
-        <p class="detail-price"><span class="visually-hidden">Precio actual: </span><span class="sale-price">11,96 €</span> <span class="visually-hidden">Precio anterior: </span><del class="original-price">14,95 €</del> <span class="discount">−20 %</span></p>
+        <p class="eyebrow" id="book-category"></p>
+        <h1 id="book-title"></h1>
+        <p class="detail-author" id="book-author"></p>
+        <div id="book-rating"></div>
+        <div id="book-price"></div>
         <div class="detail-description">
           <h2>Sobre el libro</h2>
-          <p>En una sociedad dividida en distritos, Katniss Everdeen se presenta voluntaria para participar en los Juegos del Hambre, una competición televisada donde la supervivencia está en juego.</p>
-          <p>Una historia sobre la valentía, las decisiones difíciles y la lucha por un futuro diferente.</p>
+          <p id="book-description"></p>
         </div>
         <dl class="book-metadata">
-          <div><dt>Autora</dt><dd>Suzanne Collins</dd></div>
+          <div><dt>Autoría</dt><dd id="book-metadata-author"></dd></div>
         </dl>
         <button class="button" type="button" disabled>Añadir al carrito <span aria-hidden="true">→</span></button>
         <p class="demo-note">El carrito estará disponible en una próxima fase. Precio ficticio.</p>
       </div>
     </article>
 
-    <section class="reviews" id="resenas" aria-labelledby="reviews-title">
+    <section class="reviews" id="resenas" aria-labelledby="reviews-title" hidden>
       <div class="reviews-heading">
         <div>
           <p class="eyebrow">OPINIONES DE LECTORES</p>
@@ -116,6 +118,10 @@
           <button class="button" type="submit" disabled>Publicar reseña <span aria-hidden="true">→</span></button>
         </form>
       </div>
+    </section>
+    <section class="reviews" id="reviews-placeholder" hidden>
+      <h2>Reseñas</h2>
+      <p>Las reseñas de este libro estarán disponibles en la próxima fase.</p>
     </section>
   </main>
 

@@ -22,4 +22,10 @@ servidor.get("/api/books", (req, res) => {
   return res.json({ content: libros.slice(inicio, inicio + size), page, size, totalElements: libros.length, totalPages: Math.ceil(libros.length / size) });
 });
 
+servidor.get("/api/books/:id", (req, res) => {
+  const libro = router.db.get("books").find({ id: req.params.id }).value();
+  if (!libro) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Libro no encontrado." } });
+  return res.json(libro);
+});
+
 servidor.listen(3000, "127.0.0.1", () => console.log("API simulada: http://localhost:3000/api/books"));

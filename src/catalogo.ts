@@ -14,24 +14,24 @@ function crearTarjeta(libro: Libro): HTMLElement {
   portada.append(imagen);
 
   const informacion = elemento("div", "book-info");
-  const titulo = elemento("h3", "", libro.title);
+  const titulo = elemento("h3");
+  const ruta = `libro.html?id=${encodeURIComponent(libro.id)}`;
+  const enlaceTitulo = elemento("a", "", libro.title);
+  enlaceTitulo.href = ruta;
+  titulo.append(enlaceTitulo);
   informacion.append(elemento("p", "book-category", libro.category), titulo,
     elemento("p", "book-author", libro.author), crearPuntuacion(libro.averageRating, libro.reviewCount),
     crearPrecio(libro, "book-price"));
 
-  // El único detalle disponible en la maqueta es el primer libro.
-  if (libro.id === "b01") {
-    const enlacePortada = elemento("a", "cover-link");
-    enlacePortada.href = "libro.html";
-    enlacePortada.setAttribute("aria-label", `Ver detalle de ${libro.title}`);
-    enlacePortada.append(portada);
-    articulo.append(enlacePortada);
-    const enlace = elemento("a", "book-detail-link", "Ver detalle ↗");
-    enlace.href = "libro.html";
-    informacion.append(enlace);
-  } else {
-    articulo.append(portada);
-  }
+  const enlacePortada = elemento("a", "cover-link");
+  enlacePortada.href = ruta;
+  enlacePortada.setAttribute("aria-label", `Ver detalle de ${libro.title}`);
+  enlacePortada.append(portada);
+  articulo.append(enlacePortada);
+  const enlace = elemento("a", "book-detail-link", "Ver detalle ↗");
+  enlace.href = ruta;
+  enlace.setAttribute("aria-label", `Ver detalle de ${libro.title}`);
+  informacion.append(enlace);
   articulo.append(informacion);
   return articulo;
 }
