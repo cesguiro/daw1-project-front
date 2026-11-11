@@ -57,45 +57,11 @@
           <p class="eyebrow">OPINIONES DE LECTORES</p>
           <h2 id="reviews-title">Reseñas</h2>
         </div>
-        <p class="rating"><span class="stars" aria-hidden="true">★★★★☆</span> <span>4,3 de 5 · 6 reseñas</span></p>
+        <div id="reviews-rating"></div>
       </div>
-      <div class="review-list">
-        <article class="review">
-          <div class="review-header"><h3>Lucía M.</h3><time datetime="2025-03-15">15 de marzo de 2025</time></div>
-          <p class="rating"><span class="stars" aria-hidden="true">★★★★★</span> <span>5 de 5</span></p>
-          <p>Una historia emocionante que me enganchó desde el principio. Katniss es un personaje difícil de olvidar.</p>
-        </article>
-        <article class="review">
-          <div class="review-header"><h3>Daniel R.</h3><time datetime="2025-02-22">22 de febrero de 2025</time></div>
-          <p class="rating"><span class="stars" aria-hidden="true">★★★★☆</span> <span>4 de 5</span></p>
-          <p>El mundo que plantea resulta inquietante y la historia mantiene la tensión hasta el final.</p>
-        </article>
-        <article class="review">
-          <div class="review-header"><h3>Ana P.</h3><time datetime="2025-01-30">30 de enero de 2025</time></div>
-          <p class="rating"><span class="stars" aria-hidden="true">★★★★☆</span> <span>4 de 5</span></p>
-          <p>Una lectura ágil, con personajes interesantes y muchos momentos para reflexionar.</p>
-        </article>
-        <article class="review">
-          <div class="review-header"><h3>Marcos L.</h3><time datetime="2025-01-18">18 de enero de 2025</time></div>
-          <p class="rating"><span class="stars" aria-hidden="true">★★★★★</span> <span>5 de 5</span></p>
-          <p>Me gustó mucho cómo combina la aventura con las decisiones que deben tomar los personajes.</p>
-        </article>
-        <article class="review">
-          <div class="review-header"><h3>Clara G.</h3><time datetime="2025-01-05">5 de enero de 2025</time></div>
-          <p class="rating"><span class="stars" aria-hidden="true">★★★★☆</span> <span>4 de 5</span></p>
-          <p>Una novela entretenida que invita a seguir leyendo la saga.</p>
-        </article>
-      </div>
-      <details class="more-reviews">
-        <summary>Mostrar más reseñas</summary>
-        <div class="review-list">
-          <article class="review">
-            <div class="review-header"><h3>Pablo S.</h3><time datetime="2024-12-20">20 de diciembre de 2024</time></div>
-            <p class="rating"><span class="stars" aria-hidden="true">★★★★☆</span> <span>4 de 5</span></p>
-            <p>La ambientación es original y la historia se lee muy rápido.</p>
-          </article>
-        </div>
-      </details>
+      <p class="loading-message" id="reviews-status" role="status">Cargando reseñas...</p>
+      <div class="review-list" id="review-list"></div>
+      <button type="button" class="more-reviews-button" id="more-reviews" hidden>Mostrar más reseñas</button>
       <p class="demo-note">Estas reseñas son ficticias y se muestran como ejemplo.</p>
       <div class="panel review-form">
         <h3>Escribir una reseña</h3>
@@ -118,10 +84,6 @@
           <button class="button" type="submit" disabled>Publicar reseña <span aria-hidden="true">→</span></button>
         </form>
       </div>
-    </section>
-    <section class="reviews" id="reviews-placeholder" hidden>
-      <h2>Reseñas</h2>
-      <p>Las reseñas de este libro estarán disponibles en la próxima fase.</p>
     </section>
   </main>
 

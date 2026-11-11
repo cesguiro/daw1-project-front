@@ -1,6 +1,6 @@
 # Contrato inicial de la API
 
-Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo y el detalle; las demás rutas se incorporarán en sus fases correspondientes.
+Propuesta para coordinar el front y el back de la librería. La simulación implementa el catálogo, el detalle y la consulta de reseñas; las demás rutas se incorporarán en sus fases correspondientes.
 
 ## Convenciones
 

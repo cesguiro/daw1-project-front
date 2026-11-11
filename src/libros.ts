@@ -19,3 +19,12 @@ export interface Pagina<T> {
   totalElements: number;
   totalPages: number;
 }
+
+export interface Resena {
+  id: string;
+  bookId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}

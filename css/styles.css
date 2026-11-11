@@ -104,9 +104,8 @@ h1, h2, h3 { font-family: var(--serif); }
 .review-header h3 { margin: 0; font-family: var(--sans); font-size: 0.9rem; }
 .review-header time { color: var(--muted); font-size: 0.75rem; }
 .review > p:last-child { margin-bottom: 0; color: #5c6a61; font-size: 0.85rem; line-height: 1.7; }
-.more-reviews { margin-top: 20px; }
-.more-reviews summary { width: fit-content; color: #98503d; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
-.more-reviews .review-list { margin-top: 20px; }
+.more-reviews-button { margin-top: 20px; padding: 0; border: 0; background: transparent; color: #98503d; font-size: 0.85rem; font-weight: bold; text-decoration: underline; cursor: pointer; }
+.more-reviews-button:disabled { opacity: 0.5; cursor: not-allowed; }
 .reviews > .demo-note { margin-top: 18px; }
 .review-form { max-width: 650px; margin-top: 30px; }
 .review-form h3 { margin-bottom: 10px; font-size: 1.4rem; font-weight: normal; }

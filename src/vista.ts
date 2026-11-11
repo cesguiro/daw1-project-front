@@ -1,4 +1,4 @@
-import type { Libro } from "./libros.js";
+import type { Libro, Resena } from "./libros.js";
 
 export function elemento<K extends keyof HTMLElementTagNameMap>(etiqueta: K, clase = "", texto = ""): HTMLElementTagNameMap[K] {
   const resultado = document.createElement(etiqueta);
@@ -42,4 +42,19 @@ export function crearPuntuacion(media: number | null, cantidad: number): HTMLPar
   const numero = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(media);
   puntuacion.append(estrellas, elemento("span", "", `${numero} de 5 · ${cantidad} ${cantidad === 1 ? "reseña" : "reseñas"}`));
   return puntuacion;
+}
+
+export function crearResena(resena: Resena): HTMLElement {
+  const articulo = elemento("article", "review");
+  const cabecera = elemento("div", "review-header");
+  const fecha = elemento("time");
+  fecha.dateTime = resena.createdAt;
+  fecha.textContent = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(resena.createdAt));
+  cabecera.append(elemento("h3", "", resena.userName), fecha);
+  const estrellas = elemento("span", "stars", "★".repeat(resena.rating) + "☆".repeat(5 - resena.rating));
+  estrellas.setAttribute("aria-hidden", "true");
+  const puntuacion = elemento("p", "rating");
+  puntuacion.append(estrellas, elemento("span", "", `${resena.rating} de 5`));
+  articulo.append(cabecera, puntuacion, elemento("p", "", resena.comment));
+  return articulo;
 }
